@@ -103,12 +103,13 @@ export class PostgresService implements IDataService {
         // Password logic would go here
     }
 
-    async updateUserRole(userId: string, role: 'admin' | 'user'): Promise<void> {
+    async updateUserRole(userId: string, role: 'admin' | 'user'): Promise<User | null> {
         await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, userId]);
+        return this.getUser(userId);
     }
 
-    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<void> {
-        await this.updateUser({ ...updates, id: userId });
+    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<User | null> {
+        return this.updateUser({ ...updates, id: userId });
     }
 
     async inviteUserToBoard(boardId: string, userId: string): Promise<void> {

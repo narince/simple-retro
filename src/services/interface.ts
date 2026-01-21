@@ -45,7 +45,7 @@ export interface IDataService {
     // Admin
     deleteUser(userId: string): Promise<void>;
     updateUserPassword(userId: string, password: string): Promise<void>;
-    updateUserRole(userId: string, role: 'admin' | 'user'): Promise<void>;
+    updateUserRole(userId: string, role: 'admin' | 'user'): Promise<User | null>;
     createUser(email: string, fullName: string, role: 'admin' | 'user', password?: string): Promise<User>;
-    adminUpdateUser(userId: string, updates: Partial<User>): Promise<void>;
+    adminUpdateUser(userId: string, updates: Partial<User>): Promise<User | null>;
 }

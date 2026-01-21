@@ -472,7 +472,7 @@ export class LocalStorageService implements IDataService {
         return;
     }
 
-    async updateUserRole(userId: string, role: 'admin' | 'user'): Promise<void> {
+    async updateUserRole(userId: string, role: 'admin' | 'user'): Promise<User | null> {
         const users = this.get<User>(STORAGE_KEYS.USERS);
         const userIndex = users.findIndex(u => u.id === userId);
         if (userIndex >= 0) {
@@ -486,10 +486,12 @@ export class LocalStorageService implements IDataService {
                     localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(users[userIndex]));
                 }
             }
+            return users[userIndex];
         }
+        return null;
     }
 
-    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<void> {
+    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<User | null> {
         const users = this.get<User>(STORAGE_KEYS.USERS);
         const userIndex = users.findIndex(u => u.id === userId);
         if (userIndex >= 0) {
@@ -503,7 +505,9 @@ export class LocalStorageService implements IDataService {
                     localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(users[userIndex]));
                 }
             }
+            return users[userIndex];
         }
+        return null;
     }
 
     async createUser(email: string, fullName: string, role: 'admin' | 'user', _password?: string): Promise<User> {

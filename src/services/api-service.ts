@@ -129,20 +129,24 @@ export class ApiService implements IDataService {
         await this.updateUser({ avatar_url: avatarUrl });
     }
 
-    async updateUserRole(userId: string, role: string): Promise<void> {
-        await fetch(`${API_BASE}/users/${userId}`, {
+    async updateUserRole(userId: string, role: string): Promise<User | null> {
+        const res = await fetch(`${API_BASE}/users/${userId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role })
         });
+        if (!res.ok) throw new Error("Failed to update role");
+        return res.json();
     }
 
-    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<void> {
-        await fetch(`${API_BASE}/users/${userId}`, {
+    async adminUpdateUser(userId: string, updates: Partial<User>): Promise<User | null> {
+        const res = await fetch(`${API_BASE}/users/${userId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates)
         });
+        if (!res.ok) return null;
+        return res.json();
     }
 
     async updateUserPassword(userId: string, pass: string): Promise<void> {

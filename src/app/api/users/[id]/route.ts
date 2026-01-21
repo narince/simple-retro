@@ -13,13 +13,14 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
         const body = await request.json();
 
         if (body.role) {
-            await serverDataService.updateUserRole(params.id, body.role);
-            return NextResponse.json({ success: true });
+            console.log(`[API] Updating role for ${params.id} to ${body.role}`);
+            const updatedUser = await serverDataService.updateUserRole(params.id, body.role);
+            return NextResponse.json(updatedUser);
         }
 
         // Generic admin update
-        await serverDataService.adminUpdateUser(params.id, body);
-        return NextResponse.json({ success: true });
+        const updatedUser = await serverDataService.adminUpdateUser(params.id, body);
+        return NextResponse.json(updatedUser);
 
     } catch (error) {
         return NextResponse.json({ error: 'Error' }, { status: 500 });
