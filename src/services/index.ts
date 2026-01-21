@@ -1,6 +1,8 @@
 
 import { IDataService } from './interface';
-import { LocalStorageService } from './local-storage-service';
+import { PostgresService } from './postgres-service';
+import { ApiService } from './api-service';
 
-// For now, force Local First (Netlify Compatibility)
-export const dataService: IDataService = new LocalStorageService();
+// Use Postgres if available (Neon), otherwise fallback to API (File) or LocalStorage
+// For this migration, we default to PostgresService as we have credentials
+export const dataService: IDataService = new PostgresService();
