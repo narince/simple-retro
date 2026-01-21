@@ -446,8 +446,8 @@ export default function BoardPage() {
                             comments={activeCardData.comments}
                             color={columns.find(c => c.id === activeCardData.column_id)?.color}
                             votedUserIds={activeCardData.voted_user_ids}
-                            authorName={activeCardData.author_name}
-                            authorAvatar={activeCardData.author_avatar}
+                            authorName={activeCardData.author_full_name}
+                            authorAvatar={activeCardData.author_avatar_url}
                             isAnonymous={activeCardData.isAnonymous}
                         />
                     ) : null}
