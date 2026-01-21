@@ -13,7 +13,7 @@ export default function ContactPage() {
                 <div className="mb-8">
                     <Link href="/">
                         <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-blue-600">
-                            <ArrowLeft className="h-4 w-4" /> Back to Home
+                            <ArrowLeft className="h-4 w-4" /> {t('contact.back_home')}
                         </Button>
                     </Link>
                 </div>
@@ -30,8 +30,8 @@ export default function ContactPage() {
                                 <Mail className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">Email</h3>
-                                <p className="text-slate-600 dark:text-slate-400 mb-2">Our friendly team is here to help.</p>
+                                <h3 className="font-bold text-lg mb-1">{t('contact.section_email')}</h3>
+                                <p className="text-slate-600 dark:text-slate-400 mb-2">{t('contact.email_desc')}</p>
                                 <a href="mailto:support@simpleretro.demo" className="text-blue-600 hover:underline font-medium">support@simpleretro.demo</a>
                             </div>
                         </div>
@@ -41,8 +41,8 @@ export default function ContactPage() {
                                 <MapPin className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">Office</h3>
-                                <p className="text-slate-600 dark:text-slate-400 mb-2">Come say hello at our office headquarters.</p>
+                                <h3 className="font-bold text-lg mb-1">{t('contact.section_office')}</h3>
+                                <p className="text-slate-600 dark:text-slate-400 mb-2">{t('contact.office_desc')}</p>
                                 <p className="text-slate-900 dark:text-slate-100 font-medium">
                                     100 Smith Street<br />
                                     Collingwood VIC 3066 AU
@@ -52,10 +52,10 @@ export default function ContactPage() {
                     </div>
 
                     <div className="bg-slate-50 dark:bg-zinc-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-800">
-                        <h3 className="font-bold text-xl mb-6">Send us a message</h3>
+                        <h3 className="font-bold text-xl mb-6">{t('contact.send_message_title')}</h3>
                         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Email</label>
+                                <label htmlFor="email" className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">{t('contact.form_email')}</label>
                                 <input
                                     type="email"
                                     id="email"
@@ -64,16 +64,16 @@ export default function ContactPage() {
                                 />
                             </div>
                             <div>
-                                <label htmlFor="message" className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Message</label>
+                                <label htmlFor="message" className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">{t('contact.form_message')}</label>
                                 <textarea
                                     id="message"
                                     rows={4}
                                     className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="How can we help?"
+                                    placeholder={t('contact.form_placeholder')}
                                 ></textarea>
                             </div>
                             <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                                Send Message
+                                {t('contact.send_button')}
                             </Button>
                         </form>
                     </div>
