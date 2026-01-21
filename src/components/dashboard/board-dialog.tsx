@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,9 @@ export function BoardDialog({ open, onOpenChange, onSubmit, initialTitle = "", m
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
                         {mode === 'create' ? t('dialog.create_board.title') : t('dialog.rename_board.title')}
                     </DialogTitle>
+                    <DialogDescription className="text-slate-500 dark:text-slate-400">
+                        {mode === 'create' ? t('dialog.create_board.desc') : t('dialog.rename_board.desc')}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit}>

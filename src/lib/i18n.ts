@@ -76,7 +76,7 @@ const translations = {
 
         // Dialogs
         'dialog.create_board.title': 'Create Board',
-        'dialog.create_board.description': 'Add a new board for your team.',
+        'dialog.create_board.desc': 'Add a new board for your team.',
         'dialog.create_board.name': 'Board Name',
         'dialog.create_board.template': 'Template',
         'dialog.create_board.max_votes': 'Max Votes Per User',
@@ -85,6 +85,7 @@ const translations = {
         'dialog.create_board.board_level': 'Board level',
 
         'dialog.rename_board.title': 'Rename Board',
+        'dialog.rename_board.desc': 'Enter a new name for your board.',
         'dialog.rename_board.submit': 'Save Changes',
 
         'dialog.delete_board.title': 'Delete Board',
@@ -379,7 +380,7 @@ const translations = {
 
         // Dialogs
         'dialog.create_board.title': 'Pano Oluştur',
-        'dialog.create_board.description': 'Takımınız için yeni bir pano ekleyin.',
+        'dialog.create_board.desc': 'Takımınız için yeni bir pano ekleyin.',
         'dialog.create_board.name': 'Pano Adı',
         'dialog.create_board.template': 'Şablon',
         'dialog.create_board.max_votes': 'Kullanıcı Başına Oy Hakkı',
@@ -388,6 +389,7 @@ const translations = {
         'dialog.create_board.board_level': 'Pano seviyesi',
 
         'dialog.rename_board.title': 'Panoyu Yeniden Adlandır',
+        'dialog.rename_board.desc': 'Panonuz için yeni bir isim girin.',
         'dialog.rename_board.submit': 'Kaydet',
 
         'dialog.delete_board.title': 'Panoyu Sil',

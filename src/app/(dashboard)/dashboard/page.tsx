@@ -55,17 +55,10 @@ export default function DashboardPage() {
                 return;
             }
             setUser(currentUser);
-            const allBoards = await dataService.getBoards('any');
-            // STRICT FILTERING
-            const myBoards = allBoards.filter(b => {
-                const isOwner = b.owner_id === currentUser.id || b.created_by === currentUser.id;
-                const isMember = b.allowed_user_ids?.includes(currentUser.id);
-                return isOwner || isMember;
-            });
-
-            // Sort by date desc
-            myBoards.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-            setBoards(myBoards);
+            // Use current user ID as teamId for now, to ensure personal boards persist
+            // In a real team app, this would be the Team ID from the user's profile/context.
+            const allBoards = await dataService.getBoards(currentUser.id);
+            setBoards(allBoards);
             setLoading(false);
         };
         load();
@@ -75,9 +68,9 @@ export default function DashboardPage() {
         if (!user) return;
         setLoading(true);
 
+        // ... (keep template logic)
         let initialColumns;
         if (options?.templateId) {
-            // Updated to use translated strings for column titles so they persist in the correct language
             const TEMPLATES: Record<string, { title: string; color: string }[]> = {
                 'start-stop-continue': [
                     { title: t('templates.column.start'), color: 'bg-teal-600' },
@@ -103,7 +96,7 @@ export default function DashboardPage() {
             initialColumns = TEMPLATES[options.templateId];
         }
 
-        const newBoard = await dataService.createBoard(title, 'default-team', {
+        const newBoard = await dataService.createBoard(title, user.id, {
             initialColumns,
             maxVotes: options?.maxVotes
         });
