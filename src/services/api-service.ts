@@ -289,6 +289,12 @@ export class ApiService implements IDataService {
         await fetch(`${API_BASE}/cards/${cardId}`, { method: 'PATCH', body: JSON.stringify({ column_id: newColId }) });
     }
 
+    async getReactions(boardId: string, since: number): Promise<any[]> {
+        const res = await fetch(`${API_BASE}/reactions?boardId=${boardId}&since=${since}`);
+        if (!res.ok) return [];
+        return res.json();
+    }
+
     async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
         await fetch(`${API_BASE}/reactions`, {
             method: 'POST',

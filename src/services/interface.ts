@@ -38,6 +38,7 @@ export interface IDataService {
 
     // Reactions & Misc
     broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void>;
+    getReactions(boardId: string, since: number): Promise<any[]>;
     updateUserAvatar(avatarUrl: string): Promise<void>;
     getUsers(): Promise<User[]>;
     inviteUserToBoard(boardId: string, userId: string): Promise<void>;

@@ -334,11 +334,46 @@ export class PostgresService implements IDataService {
         await pool.query('DELETE FROM comments WHERE id = $1', [commentId]);
     }
 
-    async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
-        // No-op for SQL, handled by ephemeral events usually
+    async getReactions(boardId: string, since: number): Promise<any[]> {
+        // Ensure table exists (Lazy migration for cleanup task)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS reactions (
+                id UUID PRIMARY KEY,
+                board_id UUID NOT NULL,
+                emoji TEXT NOT NULL,
+                user_id UUID NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+
+        // Convert JS timestamp (ms) to Postgres Timestamp? 
+        // Or store as bigint/timestamp? 
+        // Let's rely on created_at.
+        // If 'since' is 0, get all (limit?).
+
+        const sinceDate = new Date(since);
+        const res = await pool.query(
+            'SELECT * FROM reactions WHERE board_id = $1 AND created_at > $2 ORDER BY created_at ASC',
+            [boardId, sinceDate.toISOString()]
+        );
+
+        return res.rows.map(r => ({
+            id: r.id,
+            board_id: r.board_id,
+            emoji: r.emoji,
+            user_id: r.user_id,
+            timestamp: new Date(r.created_at).getTime()
+        }));
     }
 
-    // --- Helpers ---
+    async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
+        // Cleanup old reactions occassionally?
+        // Insert new
+        await pool.query(
+            'INSERT INTO reactions (id, board_id, emoji, user_id, created_at) VALUES ($1, $2, $3, $4, NOW())',
+            [crypto.randomUUID(), boardId, emoji, userId]
+        );
+    }
     private mapUser(row: any): User {
         return {
             id: row.id,

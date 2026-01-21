@@ -609,6 +609,20 @@ export class LocalStorageService implements IDataService {
 
 
 
+    async getReactions(boardId: string, since: number): Promise<any[]> {
+        // Mock implementation for local storage
+        if (typeof window === 'undefined') return [];
+        const item = localStorage.getItem('retro_reaction_event');
+        if (!item) return [];
+
+        const event = JSON.parse(item);
+        // Return if matches board and is newer (simple single-event simulation)
+        if (event.boardId === boardId && event.timestamp > since) {
+            return [event];
+        }
+        return [];
+    }
+
     // Broadcast Implementation (Storage Event based)
     async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
         const reactionEvent = {
@@ -620,8 +634,6 @@ export class LocalStorageService implements IDataService {
         // Trigger storage event for other tabs
         if (typeof window !== 'undefined') {
             localStorage.setItem('retro_reaction_event', JSON.stringify(reactionEvent));
-            // Cleanup immediate to allow same event again? 
-            // Better to let it be overwritten or use timestamp to detect change.
         }
     }
 }
