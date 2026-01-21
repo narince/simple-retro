@@ -94,6 +94,7 @@ export function LoginForm() {
                                     <Label htmlFor="email">{t('login.email')}</Label>
                                     <Input
                                         id="email"
+                                        name="email"
                                         type="email"
                                         autoComplete="username"
                                         placeholder="name@example.com"
@@ -107,6 +108,7 @@ export function LoginForm() {
                                     <Label htmlFor="password">{t('login.password')}</Label>
                                     <Input
                                         id="password"
+                                        name="password"
                                         type="password"
                                         autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                                         className="h-11 bg-white dark:bg-slate-950"
