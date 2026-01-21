@@ -1,0 +1,130 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { dataService } from '@/services';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, Loader2 } from 'lucide-react';
+
+import { useTranslation } from '@/lib/i18n';
+
+import { useAppStore } from '@/lib/store';
+
+export function LoginForm() {
+    const router = useRouter();
+    const { t } = useTranslation();
+    const setCurrentUser = useAppStore(state => state.setCurrentUser);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+
+    const handleAuth = async (e: React.FormEvent) => {
+        // ... (keep same)
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            let result;
+            if (mode === 'signup') {
+                result = await dataService.signUp(email);
+            } else {
+                result = await dataService.signIn(email);
+            }
+
+            if (result.error) throw new Error(result.error);
+
+            // Sync with global store immediately so Header updates
+            if (result.user) {
+                setCurrentUser(result.user);
+            }
+            // Actually, simply navigating to /dashboard should re-mount DashboardLayout -> Header?
+            // Next.js app router soft nav might keep Layout mounted.
+            // So we SHOULD update the store.
+
+            router.push('/dashboard');
+        } catch (err: any) {
+            const message = err.message;
+            if (message === 'AUTH_USER_NOT_FOUND') {
+                setError(t('error.AUTH_USER_NOT_FOUND'));
+            } else if (message === 'AUTH_USER_EXISTS') {
+                setError(t('error.AUTH_USER_EXISTS'));
+            } else {
+                setError(message || t('login.error'));
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto space-y-6">
+            <div className="text-center space-y-2">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                    {mode === 'signin' ? t('login.title') : t('login.create_account')}
+                </h1>
+            </div>
+
+            <Card className="w-full border-0 shadow-xl bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
+                <CardContent className="pt-6">
+                    <form onSubmit={handleAuth} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">{t('login.email')}</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="name@example.com"
+                                className="h-11 bg-white dark:bg-slate-950"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">{t('login.password')}</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                className="h-11 bg-white dark:bg-slate-950"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 rounded-lg dark:bg-red-900/20 dark:text-red-400">
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                {error}
+                            </div>
+                        )}
+
+                        <Button type="submit" className="w-full h-11 text-base font-medium bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {mode === 'signin' ? t('login.button') : t('login.button_signup')}
+                        </Button>
+                    </form>
+                </CardContent>
+                <CardFooter className="flex justify-center border-t p-4 bg-slate-50/50 dark:bg-slate-800/20">
+                    <p className="text-sm text-slate-500">
+                        {mode === 'signin' ? t('login.no_account') : t('login.has_account')}
+                        <button
+                            onClick={() => {
+                                setMode(mode === 'signin' ? 'signup' : 'signin');
+                                setError(null);
+                            }}
+                            className="font-semibold text-indigo-600 hover:text-indigo-500 underline underline-offset-4"
+                        >
+                            {mode === 'signin' ? t('login.signup_action') : t('login.signin_action')}
+                        </button>
+                    </p>
+                </CardFooter>
+            </Card>
+        </div>
+    );
+}
