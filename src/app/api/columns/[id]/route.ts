@@ -1,25 +1,26 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
+import { serverDataService } from '@/services/server';
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const updates = await request.json();
-    const database = db.read();
-    const col = database.columns.find(c => c.id === id);
-    if (!col) return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const body = await request.json();
 
-    Object.assign(col, updates);
-    db.write(database);
-    return NextResponse.json(col);
+        if (body.color) {
+            await serverDataService.updateColumnColor(params.id, body.color);
+            return NextResponse.json({ success: true });
+        }
+
+        const updated = await serverDataService.updateColumn(params.id, body.title);
+        return NextResponse.json(updated);
+    } catch (error) {
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
+    }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const database = db.read();
-    database.columns = database.columns.filter(c => c.id !== id);
-    // Delete cards in col? Yes
-    database.cards = database.cards.filter(c => c.column_id !== id);
-    db.write(database);
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    await serverDataService.deleteColumn(params.id);
     return NextResponse.json({ success: true });
 }

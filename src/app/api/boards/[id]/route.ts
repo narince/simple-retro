@@ -1,45 +1,38 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
+import { serverDataService } from '@/services/server';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const board = db.read().boards.find(b => b.id === id);
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    const board = await serverDataService.getBoard(params.id);
     if (!board) return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     return NextResponse.json(board);
 }
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const updates = await request.json();
-    const database = db.read();
-    const index = database.boards.findIndex(b => b.id === id);
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const updates = await request.json();
+        // Remove ID from updates if present
+        delete updates.id;
 
-    if (index === -1) return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+        // Handle invitation special case manually if needed, or assume service handles simple updates
+        // Specifically for inviteUserToBoard which updates allowed_user_ids
+        if (updates.action === 'invite' && updates.userId) {
+            await serverDataService.inviteUserToBoard(params.id, updates.userId);
+            const updated = await serverDataService.getBoard(params.id);
+            return NextResponse.json(updated);
+        }
 
-    database.boards[index] = { ...database.boards[index], ...updates };
-    db.write(database);
-
-    return NextResponse.json(database.boards[index]);
+        const updated = await serverDataService.updateBoard(params.id, updates);
+        return NextResponse.json(updated);
+    } catch (error) {
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
+    }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const database = db.read();
-
-    // Cascade Delete
-    database.boards = database.boards.filter(b => b.id !== id);
-
-    const colsToDelete = database.columns.filter(c => c.board_id === id).map(c => c.id);
-    database.columns = database.columns.filter(c => c.board_id !== id);
-
-    database.cards = database.cards.filter(c => !colsToDelete.includes(c.column_id));
-
-    // Clean-up Reactions
-    if (database.reactions) {
-        database.reactions = database.reactions.filter(r => r.board_id !== id);
-    }
-
-    db.write(database);
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    await serverDataService.deleteBoard(params.id);
     return NextResponse.json({ success: true });
 }

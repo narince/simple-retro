@@ -1,26 +1,32 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
-import { sanitize } from '@/lib/security';
+import { serverDataService } from '@/services/server';
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const updates = await request.json();
-    if (updates.content) updates.content = sanitize(updates.content);
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const body = await request.json();
 
-    const database = db.read();
-    const index = database.cards.findIndex(c => c.id === id);
-    if (index === -1) return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+        if (body.color) {
+            await serverDataService.updateCardColor(params.id, body.color);
+            return NextResponse.json({ success: true });
+        }
 
-    database.cards[index] = { ...database.cards[index], ...updates };
-    db.write(database); // Optimization: only write if changed
-    return NextResponse.json(database.cards[index]);
+        if (body.columnId) {
+            // Move
+            await serverDataService.updateCardPosition(params.id, body.columnId, body.newIndex || 0);
+            return NextResponse.json({ success: true });
+        }
+
+        const updated = await serverDataService.updateCard(params.id, body.content);
+        return NextResponse.json(updated);
+    } catch (error) {
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
+    }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const database = db.read();
-    database.cards = database.cards.filter(c => c.id !== id);
-    db.write(database);
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    await serverDataService.deleteCard(params.id);
     return NextResponse.json({ success: true });
 }

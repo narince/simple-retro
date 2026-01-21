@@ -1,49 +1,25 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
-import { Column } from '@/services/types';
+import { serverDataService } from '@/services/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const boardId = searchParams.get('boardId');
-    if (!boardId) return NextResponse.json([]); // Return all? No, too big. Return empty if no filter.
+    if (!boardId) return NextResponse.json([]);
 
-    const cols = db.read().columns.filter(c => c.board_id === boardId).sort((a, b) => a.order_index - b.order_index);
-    return NextResponse.json(cols);
+    const columns = await serverDataService.getColumns(boardId);
+    return NextResponse.json(columns);
 }
 
 export async function POST(request: Request) {
-    const { boardId, title } = await request.json();
-    const database = db.read();
-
-    // Find max order
-    const maxOrder = database.columns
-        .filter(c => c.board_id === boardId)
-        .reduce((max, c) => Math.max(max, c.order_index), -1);
-
-    const newCol: Column = {
-        id: crypto.randomUUID(),
-        board_id: boardId,
-        title,
-        color: 'bg-slate-500',
-        order_index: maxOrder + 1,
-        created_at: new Date().toISOString()
-    };
-
-    database.columns.push(newCol);
-
-    // Sync colors just in case? No, UI fetches columns separately usually.
-    // But `board.column_colors` uses this.
-    // Let's rely on client or a refresh to sync, or update board here.
-    // Updating board:
-    const board = database.boards.find(b => b.id === boardId);
-    if (board) {
-        const cols = database.columns.filter(c => c.board_id === boardId).sort((a, b) => a.order_index - b.order_index);
-        board.column_colors = cols.map(c => c.color);
+    try {
+        const body = await request.json();
+        const { boardId, title } = body;
+        const newCol = await serverDataService.createColumn(boardId, title);
+        return NextResponse.json(newCol);
+    } catch (error) {
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
     }
-
-    db.write(database);
-    return NextResponse.json(newCol);
 }

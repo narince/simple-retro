@@ -1,17 +1,11 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
-import { Comment } from '@/services/types';
+import { serverDataService } from '@/services/server';
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string, commentId: string }> }) {
-    const { id, commentId } = await params;
-    const database = db.read();
-    const card = database.cards.find(c => c.id === id);
+export async function DELETE(request: Request, props: { params: Promise<{ id: string; commentId: string }> }) {
+    const params = await props.params;
+    const { id, commentId } = params;
 
-    if (card && card.comments) {
-        // Filter out
-        card.comments = (card.comments as Comment[]).filter(c => c.id !== commentId);
-        db.write(database);
-    }
+    await serverDataService.deleteComment(id, commentId);
     return NextResponse.json({ success: true });
 }

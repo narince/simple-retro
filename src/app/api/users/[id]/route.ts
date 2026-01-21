@@ -1,47 +1,27 @@
-
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
+import { serverDataService } from '@/services/server';
 
-// PATCH: Update User (Role, Password, Avatar)
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    try {
-        const { id } = await params;
-        const body = await request.json();
-        const database = db.read();
-        const index = database.users.findIndex(u => u.id === id);
-
-        console.log(`[API] PATCH User ${id}. Found index: ${index}. Total users: ${database.users.length}`);
-
-        if (index === -1) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
-        }
-
-        // Merge updates
-        const updatedUser = { ...database.users[index], ...body };
-
-        // Sanitize sensitive fields if needed? No, internal API.
-
-        database.users[index] = updatedUser;
-        db.write(database);
-
-        return NextResponse.json(updatedUser);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-    }
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    await serverDataService.deleteUser(params.id);
+    return NextResponse.json({ success: true });
 }
 
-// DELETE: Remove User
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const database = db.read();
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const body = await request.json();
 
-    // Check if user exists
-    const exists = database.users.some(u => u.id === id);
-    if (!exists) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        if (body.role) {
+            await serverDataService.updateUserRole(params.id, body.role);
+            return NextResponse.json({ success: true });
+        }
 
-    database.users = database.users.filter(u => u.id !== id);
-    db.write(database);
+        // Generic admin update
+        await serverDataService.adminUpdateUser(params.id, body);
+        return NextResponse.json({ success: true });
 
-    return NextResponse.json({ success: true });
+    } catch (error) {
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
+    }
 }

@@ -1,40 +1,21 @@
-
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
-import { User } from '@/services/types';
+import { serverDataService } from '@/services/server';
 
 export async function POST(request: Request) {
     try {
-        const { email } = await request.json();
+        const body = await request.json();
+        const { email } = body;
 
-        if (!email) {
-            return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+        const result = await serverDataService.signUp(email);
+
+        if (result.error) {
+            return NextResponse.json({ error: result.error }, { status: 409 });
         }
 
-        const normalizedEmail = email.trim().toLocaleLowerCase('tr-TR');
-        const database = db.read();
-
-        // Check exists
-        if (database.users.find(u => u.email.trim().toLocaleLowerCase('tr-TR') === normalizedEmail)) {
-            return NextResponse.json({ error: 'AUTH_USER_EXISTS' }, { status: 409 }); // 409 Conflict
-        }
-
-        const isFirstUser = database.users.length === 0;
-
-        const newUser: User = {
-            id: crypto.randomUUID(),
-            email: normalizedEmail,
-            full_name: normalizedEmail.split('@')[0],
-            role: isFirstUser ? 'admin' : 'user',
-            last_login_at: new Date().toISOString()
-        };
-
-        database.users.push(newUser);
-        db.write(database);
-
-        return NextResponse.json(newUser);
+        return NextResponse.json(result.user);
 
     } catch (error) {
+        console.error("Signup Error:", error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

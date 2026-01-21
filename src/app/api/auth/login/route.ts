@@ -1,32 +1,22 @@
 
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/server/db';
-import { User } from '@/services/types';
+import { serverDataService } from '@/services/server';
 
 export async function POST(request: Request) {
     try {
-        const { email } = await request.json();
+        const body = await request.json();
+        const { email } = body;
 
-        if (!email) {
-            return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+        const result = await serverDataService.signIn(email);
+
+        if (result.error) {
+            return NextResponse.json({ error: result.error }, { status: 401 });
         }
 
-        const normalizedEmail = email.trim().toLocaleLowerCase('tr-TR');
-        const database = db.read();
-
-        const user = database.users.find(u => u.email.trim().toLocaleLowerCase('tr-TR') === normalizedEmail);
-
-        if (!user) {
-            return NextResponse.json({ error: 'AUTH_USER_NOT_FOUND' }, { status: 404 });
-        }
-
-        // Update login time
-        user.last_login_at = new Date().toISOString();
-        db.write(database);
-
-        return NextResponse.json(user);
+        return NextResponse.json(result.user);
 
     } catch (error) {
+        console.error("Login Error:", error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
