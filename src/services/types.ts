@@ -63,7 +63,7 @@ export interface Card {
     author_id: string;
     author_full_name?: string;
     author_avatar_url?: string;
-    is_anonymous?: boolean;
+    isAnonymous?: boolean;
     author_name?: string;
     author_avatar?: string;
     position?: number;

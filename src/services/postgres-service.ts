@@ -75,9 +75,13 @@ export class PostgresService implements IDataService {
         return this.getUser(updates.id);
     }
 
-    async updateUserAvatar(avatarUrl: string): Promise<void> {
-        // Need current user context here, problematic in this interface design for direct server calls without ID 
-        // Assuming this is called with an ID in a real app, but for now skipping as strictly client-side flow handles this via API
+    async updateUserAvatar(avatarUrl: string, userId?: string): Promise<void> {
+        // If userId is provided (from server content), use it
+        if (userId) {
+            await pool.query('UPDATE users SET avatar_url = $1 WHERE id = $2', [avatarUrl, userId]);
+        }
+        // Otherwise this method is mainly for Interface compliance where context is implicit, 
+        // but in this server-side service we prefer explicit IDs.
     }
 
     // --- Users ---
@@ -342,6 +346,7 @@ export class PostgresService implements IDataService {
             avatar_url: row.avatar_url,
             role: row.role,
             last_login_at: row.last_login_at,
+            last_logout_at: row.last_logout_at,
             created_at: row.created_at
         };
     }

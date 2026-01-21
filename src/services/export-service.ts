@@ -68,7 +68,7 @@ export class DataExportService {
             "Author Name": c.author_name || '',
             Votes: c.votes,
             "Voted User IDs": c.voted_user_ids?.join(',') || '',
-            "Is Anonymous": c.is_anonymous ? "Yes" : "No",
+            "Is Anonymous": c.isAnonymous ? "Yes" : "No",
             "Color": c.color || '',
             "Created At": c.created_at
         })));

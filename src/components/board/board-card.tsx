@@ -32,6 +32,9 @@ interface BoardCardProps {
     authorName?: string;
     authorAvatar?: string;
     isAnonymous?: boolean;
+    authorId?: string;
+    currentUserId?: string;
+    isAdmin?: boolean;
 }
 
 const CARD_COLORS = [
@@ -42,15 +45,11 @@ const CARD_COLORS = [
     { name: "Yellow", class: "bg-yellow-500" },
 ];
 
-export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous }: BoardCardProps) {
+export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous, authorId, currentUserId, isAdmin }: BoardCardProps) {
     const { isContentBlur, disableVoting } = useAppStore();
     const { t } = useTranslation();
 
-    // Derive initial state
-    const [currentUser, setCurrentUser] = useState<string | null>(null);
-    useEffect(() => {
-        dataService.getCurrentUser().then(u => setCurrentUser(u?.id || null));
-    }, []);
+    // Removed internal user fetch, using passed prop currentUserId
 
     // Local state for optimistic updates
     const [votes, setVotes] = useState(initialVotes);
@@ -62,15 +61,20 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
     }, [initialVotes]);
 
     useEffect(() => {
-        if (currentUser) {
-            setIsLiked(votedUserIds.includes(currentUser));
+        if (currentUserId) {
+            setIsLiked(votedUserIds.includes(currentUserId));
         }
-    }, [votedUserIds, currentUser]);
+    }, [votedUserIds, currentUserId]);
 
     // Sync comments when props change
     useEffect(() => {
         setCommentsList(Array.isArray(initialComments) ? initialComments : []);
     }, [initialComments]);
+
+    // Permission Logic
+    // Card can be deleted by Creator OR Admin
+    // Comments can be deleted by Creator OR Admin
+    const canDeleteCard = isAdmin || (currentUserId && authorId === currentUserId);
 
     const [content, setContent] = useState(initialContent);
     const [isEditing, setIsEditing] = useState(false);
@@ -160,7 +164,7 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
         const nextLiked = !currentLiked;
         setIsLiked(nextLiked);
         setVotes(v => nextLiked ? v + 1 : Math.max(0, v - 1));
-        await dataService.voteCard(id, currentUser || 'anon');
+        await dataService.voteCard(id, currentUserId || 'anon');
     };
 
     // Helper for rendering
@@ -197,12 +201,12 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
         const optimisticComment = {
             id: Math.random().toString(), // Temp ID
             text: newComment,
-            author_id: currentUser,
+            author_id: currentUserId,
             created_at: new Date().toISOString()
         };
 
         setCommentsList([...commentsList, optimisticComment]);
-        await dataService.addComment(id, newComment, currentUser || 'anon');
+        await dataService.addComment(id, newComment, currentUserId || 'anon');
         setNewComment("");
         // Ideally we should re-fetch to get real ID, but for local demo this works
     };
@@ -252,10 +256,14 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                     ))}
                                 </DropdownMenuSubContent>
                             </DropdownMenuSub>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
-                                <Trash2 className="mr-2 h-4 w-4" /> {t('board.delete')}
-                            </DropdownMenuItem>
+                            {canDeleteCard && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
+                                        <Trash2 className="mr-2 h-4 w-4" /> {t('board.delete')}
+                                    </DropdownMenuItem>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -329,13 +337,15 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                 const isObj = typeof comment === 'object';
                                 const text = isObj ? comment.text : comment;
                                 // Legacy strings have no author, so no delete. New ones do.
-                                const isAuthor = currentUser && isObj && comment.author_id === currentUser;
+                                const commentAuthorId = isObj ? comment.author_id : null;
+                                const isCommentAuthor = currentUserId && commentAuthorId === currentUserId;
+                                const canDeleteComment = isAdmin || isCommentAuthor;
                                 const cId = isObj ? comment.id : index.toString();
 
                                 return (
                                     <div key={index} className="bg-black/10 p-2 rounded-sm text-xs text-white break-words group/comment flex justify-between items-start gap-2">
                                         <span>{text}</span>
-                                        {isAuthor && (
+                                        {canDeleteComment && (
                                             <button
                                                 onClick={() => handleDeleteComment(cId)}
                                                 className="opacity-0 group-hover/comment:opacity-100 text-white/50 hover:text-red-400 transition-opacity"

@@ -385,7 +385,7 @@ export class LocalStorageService implements IDataService {
             author_id: authorId,
             votes: 0,
             comments: [],
-            is_anonymous: options?.isAnonymous,
+            isAnonymous: options?.isAnonymous,
             author_name: options?.authorName,
             author_avatar: options?.authorAvatar,
             created_at: new Date().toISOString()

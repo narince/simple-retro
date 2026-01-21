@@ -43,15 +43,15 @@ export default function BoardPage() {
     const [selectedColumnId, setSelectedColumnId] = useState<string | undefined>(undefined);
     const [isInviteOpen, setIsInviteOpen] = useState(false);
 
-    const [currentUser, setCurrentUser] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<any | null>(null);
     useEffect(() => {
-        dataService.getCurrentUser().then(u => setCurrentUser(u?.id || null));
+        dataService.getCurrentUser().then(u => setCurrentUser(u));
     }, []);
 
     // Calculate User Votes
     const maxVotes = useAppStore(s => s.maxVotesPerUser);
     const currentUserVotes = cards.reduce((acc, card) => {
-        if (currentUser && card.voted_user_ids?.includes(currentUser)) {
+        if (currentUser && card.voted_user_ids?.includes(currentUser.id)) {
             return acc + 1;
         }
         return acc;
@@ -107,12 +107,12 @@ export default function BoardPage() {
 
                 // Add current user if they are logged in (they are viewing it)
                 if (currentUser) {
-                    const me = allUsers.find(u => u.id === currentUser);
+                    const me = allUsers.find(u => u.id === currentUser.id);
                     if (me) visibleMembers.push(me);
                 }
 
                 // If there's an owner and it's not the same person
-                if (loadedBoard.owner_id && loadedBoard.owner_id !== currentUser) {
+                if (loadedBoard.owner_id && loadedBoard.owner_id !== currentUser?.id) {
                     const owner = allUsers.find(u => u.id === loadedBoard.owner_id);
                     if (owner) visibleMembers.push(owner);
                 }
@@ -131,15 +131,12 @@ export default function BoardPage() {
         let authorName = undefined;
         let authorAvatar = undefined;
 
-        if (!isAnonymous && currentUser && currentUser !== 'anon') {
-            const userDetails = await dataService.getCurrentUser();
-            if (userDetails) {
-                authorName = userDetails.full_name;
-                authorAvatar = userDetails.avatar_url;
-            }
+        if (!isAnonymous && currentUser && currentUser.id !== 'anon') {
+            authorName = currentUser.full_name;
+            authorAvatar = currentUser.avatar_url;
         }
 
-        const newCard = await dataService.createCard(columnId, content, currentUser || 'anon', {
+        const newCard = await dataService.createCard(columnId, content, currentUser?.id || 'anon', {
             isAnonymous,
             authorName,
             authorAvatar
@@ -172,15 +169,15 @@ export default function BoardPage() {
         // Update local state to reflect vote immediately for limit calculation
         setCards(prevCards => prevCards.map(card => {
             if (card.id === cardId) {
-                const hasVoted = card.voted_user_ids?.includes(currentUser);
+                const hasVoted = card.voted_user_ids?.includes(currentUser.id);
                 let newVotedIds = card.voted_user_ids || [];
                 let newVotes = card.votes;
 
                 if (hasVoted) {
-                    newVotedIds = newVotedIds.filter(id => id !== currentUser);
+                    newVotedIds = newVotedIds.filter(id => id !== currentUser.id);
                     newVotes = Math.max(0, newVotes - 1);
                 } else {
-                    newVotedIds = [...newVotedIds, currentUser];
+                    newVotedIds = [...newVotedIds, currentUser.id];
                     newVotes = newVotes + 1;
                 }
 
@@ -189,14 +186,7 @@ export default function BoardPage() {
             return card;
         }));
 
-        // Service call is handled by BoardCard or we can move it here?
-        // BoardCard currently handles it. To avoid double call if we pass it down, 
-        // we should probably let BoardCard just call this callback and WE call the service?
-        // Or we let BoardCard call service and this is just for state sync. 
-        // Let's keep service call here to be clean and remove it from BoardCard if possible, 
-        // OR just duplicate the state update logic here and let BoardCard do the UI/Service interaction?
-        // Better: Make BoardPage the source of truth.
-        await dataService.voteCard(cardId, currentUser);
+        await dataService.voteCard(cardId, currentUser.id);
     };
 
     const [isDeleteColumnOpen, setIsDeleteColumnOpen] = useState(false);
@@ -325,7 +315,7 @@ export default function BoardPage() {
         let filtered = cards.filter(card => card.column_id === colId);
 
         if (activeUserFilter) {
-            filtered = filtered.filter(c => c.author_id === activeUserFilter && !c.is_anonymous);
+            filtered = filtered.filter(c => c.author_id === activeUserFilter && !c.isAnonymous);
         }
 
         if (searchQuery) {
@@ -439,6 +429,8 @@ export default function BoardPage() {
                                     onDeleteCard={handleDeleteCardRequest}
                                     canVote={canVote}
                                     onVote={handleVote}
+                                    currentUserId={currentUser?.id}
+                                    isAdmin={currentUser?.role === 'admin'}
                                 />
                             ))}
                         </SortableContext>
@@ -456,7 +448,7 @@ export default function BoardPage() {
                             votedUserIds={activeCardData.voted_user_ids}
                             authorName={activeCardData.author_name}
                             authorAvatar={activeCardData.author_avatar}
-                            isAnonymous={activeCardData.is_anonymous}
+                            isAnonymous={activeCardData.isAnonymous}
                         />
                     ) : null}
                 </DragOverlay>

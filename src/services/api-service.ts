@@ -62,6 +62,21 @@ export class ApiService implements IDataService {
 
     async signOut(): Promise<void> {
         if (typeof window !== 'undefined') {
+            try {
+                // Get user from local storage before clearing it
+                const session = localStorage.getItem('retro_session');
+                if (session) {
+                    const user = JSON.parse(session);
+                    // Call API to update last_logout_at
+                    await fetch(`${API_BASE}/auth/logout`, {
+                        method: 'POST',
+                        body: JSON.stringify({ userId: user.id }),
+                        keepalive: true // Ensure request completes even if page unloads
+                    });
+                }
+            } catch (e) {
+                console.error("Sign out error", e);
+            }
             localStorage.removeItem('retro_session');
         }
     }
@@ -110,6 +125,7 @@ export class ApiService implements IDataService {
         const currentUser = await this.getCurrentUser();
         if (!currentUser) return;
 
+        // Use the generic update flow which handles PATCH to users/:id
         await this.updateUser({ avatar_url: avatarUrl });
     }
 

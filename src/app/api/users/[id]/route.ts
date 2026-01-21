@@ -7,7 +7,7 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
     return NextResponse.json({ success: true });
 }
 
-export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     try {
         const body = await request.json();

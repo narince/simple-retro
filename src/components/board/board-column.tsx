@@ -31,6 +31,8 @@ interface ColumnProps {
     onDeleteCard: (cardId: string) => void;
     canVote?: boolean;
     onVote?: (cardId: string) => void;
+    currentUserId?: string;
+    isAdmin?: boolean;
 }
 
 const COLUMN_COLORS = [
@@ -42,7 +44,7 @@ const COLUMN_COLORS = [
     { name: "Yellow", class: "bg-yellow-500" },
 ];
 
-export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle, onDeleteColumn, onUpdateColor, onDeleteCard, canVote = true, onVote }: ColumnProps) {
+export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle, onDeleteColumn, onUpdateColor, onDeleteCard, canVote = true, onVote, currentUserId, isAdmin }: ColumnProps) {
     const { setNodeRef } = useDroppable({ id });
     const { t } = useTranslation();
     const [animateRef] = useAutoAnimate();
@@ -311,7 +313,10 @@ export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle,
                             onVote={() => onVote?.(card.id)}
                             authorName={card.author_full_name}
                             authorAvatar={card.author_avatar_url}
-                            isAnonymous={card.is_anonymous}
+                            isAnonymous={card.isAnonymous}
+                            authorId={card.author_id}
+                            currentUserId={currentUserId}
+                            isAdmin={isAdmin}
                         />
                     ))}
                 </SortableContext>
