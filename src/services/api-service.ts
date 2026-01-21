@@ -141,7 +141,7 @@ export class ApiService implements IDataService {
 
     // --- Boards ---
     async getBoards(teamId: string): Promise<Board[]> {
-        const res = await fetch(`${API_BASE}/boards`);
+        const res = await fetch(`${API_BASE}/boards?teamId=${teamId}`);
         return res.json();
     }
 
