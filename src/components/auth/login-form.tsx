@@ -89,7 +89,7 @@ export function LoginForm() {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                         <CardContent className="pt-6">
-                            <form onSubmit={handleAuth} className="space-y-4">
+                            <form onSubmit={handleAuth} className="space-y-4" method="post" action="#">
                                 <div className="space-y-2">
                                     <Label htmlFor="email">{t('login.email')}</Label>
                                     <Input
