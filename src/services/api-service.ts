@@ -184,14 +184,12 @@ export class ApiService implements IDataService {
     }
 
     async inviteUserToBoard(boardId: string, userId: string): Promise<void> {
-        const board = await this.getBoard(boardId);
-        if (!board) return;
-
-        const currentAllowed = board.allowed_user_ids || [];
-        if (currentAllowed.includes(userId)) return;
-
-        const newAllowed = [...currentAllowed, userId];
-        await this.updateBoard(boardId, { allowed_user_ids: newAllowed });
+        // Use the special action supported by the API route to handle array appending efficiently on server
+        await fetch(`${API_BASE}/boards/${boardId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'invite', userId })
+        });
     }
 
 

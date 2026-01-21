@@ -325,6 +325,7 @@ export class PostgresService implements IDataService {
             ...row,
             votes: row.votes || 0,
             voted_user_ids: row.voted_user_ids || [],
+            isAnonymous: row.is_anonymous, // Map snake_case from DB to camelCase for Frontend
             comments: [] // Needs separate join
         };
     }
