@@ -24,11 +24,8 @@ export function LoginForm() {
     const [error, setError] = useState<string | null>(null);
     const [mode, setMode] = useState<'signin' | 'signup'>('signin');
 
-    // Clear inputs on mount to solve "previewing old password" issue
-    useEffect(() => {
-        setEmail('');
-        setPassword('');
-    }, []);
+    // Standard behavior: Allow browser processing (autofill) for ease of use
+    // We removed the aggressive "clear on mount" to support Password Managers.
 
     const handleAuth = async (e: React.FormEvent) => {
         // ... (keep same logic)
@@ -98,7 +95,7 @@ export function LoginForm() {
                                     <Input
                                         id="email"
                                         type="email"
-                                        autoComplete="off"
+                                        autoComplete="username"
                                         placeholder="name@example.com"
                                         className="h-11 bg-white dark:bg-slate-950"
                                         value={email}
@@ -111,7 +108,7 @@ export function LoginForm() {
                                     <Input
                                         id="password"
                                         type="password"
-                                        autoComplete="new-password"
+                                        autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                                         className="h-11 bg-white dark:bg-slate-950"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
