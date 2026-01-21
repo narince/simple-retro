@@ -366,12 +366,12 @@ export class PostgresService implements IDataService {
         }));
     }
 
-    async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
+    async broadcastReaction(boardId: string, emoji: string, userId: string, reactionId?: string): Promise<void> {
         // Cleanup old reactions occassionally?
         // Insert new
         await pool.query(
             'INSERT INTO reactions (id, board_id, emoji, user_id, created_at) VALUES ($1, $2, $3, $4, NOW())',
-            [crypto.randomUUID(), boardId, emoji, userId]
+            [reactionId || crypto.randomUUID(), boardId, emoji, userId]
         );
     }
     private mapUser(row: any): User {

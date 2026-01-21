@@ -17,8 +17,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const { boardId, emoji, userId } = await request.json();
+    try {
+        const body = await request.json();
+        const { boardId, emoji, userId, reactionId } = body;
 
-    await serverDataService.broadcastReaction(boardId, emoji, userId);
-    return NextResponse.json({ success: true, timestamp: Date.now() });
+        await serverDataService.broadcastReaction(boardId, emoji, userId, reactionId);
+        return NextResponse.json({ success: true });
+    } catch (error) { }
 }

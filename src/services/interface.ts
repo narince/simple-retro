@@ -37,7 +37,7 @@ export interface IDataService {
     updateColumnColor(columnId: string, color: string): Promise<void>;
 
     // Reactions & Misc
-    broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void>;
+    broadcastReaction(boardId: string, emoji: string, userId: string, reactionId?: string): Promise<void>;
     getReactions(boardId: string, since: number): Promise<any[]>;
     updateUserAvatar(avatarUrl: string): Promise<void>;
     getUsers(): Promise<User[]>;

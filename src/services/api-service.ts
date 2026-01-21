@@ -295,11 +295,11 @@ export class ApiService implements IDataService {
         return res.json();
     }
 
-    async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
+    async broadcastReaction(boardId: string, emoji: string, userId: string, reactionId?: string): Promise<void> {
         await fetch(`${API_BASE}/reactions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ boardId, emoji, userId })
+            body: JSON.stringify({ boardId, emoji, userId, reactionId })
         });
     }
 }

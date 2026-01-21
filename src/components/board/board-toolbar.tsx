@@ -59,9 +59,10 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
         // For now, just broadcast
         const user = await dataService.getCurrentUser();
         if (user && boardId) {
-            await dataService.broadcastReaction(boardId, emoji, user.id);
-            // Dispatch local event for "self" view
-            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji } }));
+            const reactionId = crypto.randomUUID();
+            // Dispatch local event first with ID
+            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji, id: reactionId } }));
+            await dataService.broadcastReaction(boardId, emoji, user.id, reactionId);
         }
     };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Heart, Flame, ThumbsUp, PartyPopper, Star, Zap } from "lucide-react";
 
@@ -38,6 +38,7 @@ interface Reaction {
 export function ReactionOverlay() {
     const [reactions, setReactions] = useState<Reaction[]>([]);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const processedIdsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         dataService.getCurrentUser().then(u => setCurrentUserId(u?.id || null));
@@ -121,6 +122,11 @@ export function ReactionOverlay() {
         const handleCustom = (e: Event) => {
             const customEvent = e as CustomEvent;
             if (customEvent.detail && customEvent.detail.emoji) {
+                // If ID is present, track it
+                if (customEvent.detail.id) {
+                    if (processedIdsRef.current.has(customEvent.detail.id)) return;
+                    processedIdsRef.current.add(customEvent.detail.id);
+                }
                 addShower(customEvent.detail.emoji);
             }
         };
@@ -140,19 +146,17 @@ export function ReactionOverlay() {
                     const newEvents = await res.json();
                     if (newEvents.length > 0) {
                         let maxTs = lastTimestamp;
-                        const myId = currentUserId; // capture from closure
 
                         newEvents.forEach((evt: any) => {
-                            // Deduplicate local echo
-                            // If I sent it, I already saw it via handleCustom.
-                            // Check userId and timestamp.
-                            // Ideally we trust currentUserId is set.
-                            // If currentUserId is null (not loaded yet), we might double show. Rare.
-                            // Also check if timestamp is recent (> 5s ago means it's old, show it? No, 'since' handles old).
-                            // If timestamp is VERY recent (< 5s) AND it's ME, skip.
-                            if (currentUserId && evt.userId === currentUserId && (Date.now() - evt.timestamp < 5000)) {
-                                // Skip my own recent echo
+                            // Deduplicate by ID if available
+                            if (evt.id && processedIdsRef.current.has(evt.id)) {
+                                return;
+                            }
+                            // Also fallback to check user ID double echo if ID not present (legacy)
+                            if (currentUserId && evt.user_id === currentUserId && (Date.now() - evt.timestamp < 5000)) {
+                                // Skip recent echo
                             } else {
+                                if (evt.id) processedIdsRef.current.add(evt.id);
                                 addShower(evt.emoji);
                             }
 

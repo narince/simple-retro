@@ -624,11 +624,12 @@ export class LocalStorageService implements IDataService {
     }
 
     // Broadcast Implementation (Storage Event based)
-    async broadcastReaction(boardId: string, emoji: string, userId: string): Promise<void> {
+    async broadcastReaction(boardId: string, emoji: string, userId: string, reactionId?: string): Promise<void> {
         const reactionEvent = {
             boardId,
             emoji,
             userId,
+            reactionId,
             timestamp: Date.now()
         };
         // Trigger storage event for other tabs
