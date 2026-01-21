@@ -3,10 +3,20 @@ import { LoginForm } from '@/components/auth/login-form';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
 
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+
 export default function LoginPage() {
     const { t } = useTranslation();
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4 relative">
+            <Link
+                href="/"
+                className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
+                title="Back to Home"
+            >
+                <ArrowLeft className="w-6 h-6" />
+            </Link>
             <div className="absolute top-4 right-4">
                 <LanguageSwitcher />
             </div>

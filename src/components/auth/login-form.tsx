@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { dataService } from '@/services';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTranslation } from '@/lib/i18n';
 
@@ -23,8 +24,14 @@ export function LoginForm() {
     const [error, setError] = useState<string | null>(null);
     const [mode, setMode] = useState<'signin' | 'signup'>('signin');
 
+    // Clear inputs on mount to solve "previewing old password" issue
+    useEffect(() => {
+        setEmail('');
+        setPassword('');
+    }, []);
+
     const handleAuth = async (e: React.FormEvent) => {
-        // ... (keep same)
+        // ... (keep same logic)
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -39,13 +46,9 @@ export function LoginForm() {
 
             if (result.error) throw new Error(result.error);
 
-            // Sync with global store immediately so Header updates
             if (result.user) {
                 setCurrentUser(result.user);
             }
-            // Actually, simply navigating to /dashboard should re-mount DashboardLayout -> Header?
-            // Next.js app router soft nav might keep Layout mounted.
-            // So we SHOULD update the store.
 
             router.push('/dashboard');
         } catch (err: any) {
@@ -65,51 +68,72 @@ export function LoginForm() {
     return (
         <div className="flex flex-col items-center justify-center w-full max-w-md mx-auto space-y-6">
             <div className="text-center space-y-2">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                    {mode === 'signin' ? t('login.title') : t('login.create_account')}
-                </h1>
+                <AnimatePresence mode="wait">
+                    <motion.h1
+                        key={mode === 'signin' ? 'title-signin' : 'title-signup'}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
+                    >
+                        {mode === 'signin' ? t('login.title') : t('login.create_account')}
+                    </motion.h1>
+                </AnimatePresence>
             </div>
 
-            <Card className="w-full border-0 shadow-xl bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
-                <CardContent className="pt-6">
-                    <form onSubmit={handleAuth} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">{t('login.email')}</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="name@example.com"
-                                className="h-11 bg-white dark:bg-slate-950"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">{t('login.password')}</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                className="h-11 bg-white dark:bg-slate-950"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
+            <Card className="w-full border-0 shadow-xl bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 overflow-hidden">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={mode}
+                        initial={{ opacity: 0, x: mode === 'signup' ? 20 : -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: mode === 'signup' ? -20 : 20 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                        <CardContent className="pt-6">
+                            <form onSubmit={handleAuth} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">{t('login.email')}</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        autoComplete="off"
+                                        placeholder="name@example.com"
+                                        className="h-11 bg-white dark:bg-slate-950"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">{t('login.password')}</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        className="h-11 bg-white dark:bg-slate-950"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
 
-                        {error && (
-                            <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 rounded-lg dark:bg-red-900/20 dark:text-red-400">
-                                <AlertCircle className="w-4 h-4 mr-2" />
-                                {error}
-                            </div>
-                        )}
+                                {error && (
+                                    <div className="flex items-center p-3 text-sm text-red-600 bg-red-50 rounded-lg dark:bg-red-900/20 dark:text-red-400">
+                                        <AlertCircle className="w-4 h-4 mr-2" />
+                                        {error}
+                                    </div>
+                                )}
 
-                        <Button type="submit" className="w-full h-11 text-base font-medium bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {mode === 'signin' ? t('login.button') : t('login.button_signup')}
-                        </Button>
-                    </form>
-                </CardContent>
+                                <Button type="submit" className="w-full h-11 text-base font-medium bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {mode === 'signin' ? t('login.button') : t('login.button_signup')}
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </motion.div>
+                </AnimatePresence>
                 <CardFooter className="flex justify-center border-t p-4 bg-slate-50/50 dark:bg-slate-800/20">
                     <p className="text-sm text-slate-500">
                         {mode === 'signin' ? t('login.no_account') : t('login.has_account')}
