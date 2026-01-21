@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { dataService } from '@/services';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useTranslation } from '@/lib/i18n';
@@ -15,14 +15,21 @@ import { useTranslation } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 
 export function LoginForm() {
+    const searchParams = useSearchParams();
     const router = useRouter();
     const { t } = useTranslation();
     const setCurrentUser = useAppStore(state => state.setCurrentUser);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+
+    // Initialize mode from URL param if present
+    const [mode, setMode] = useState<'signin' | 'signup'>(() => {
+        const queryMode = searchParams.get('mode');
+        return queryMode === 'signup' ? 'signup' : 'signin';
+    });
 
     // Standard behavior: Allow browser processing (autofill) for ease of use
     // We removed the aggressive "clear on mount" to support Password Managers.
@@ -106,16 +113,29 @@ export function LoginForm() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password">{t('login.password')}</Label>
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                                        className="h-11 bg-white dark:bg-slate-950"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                                            className="h-11 bg-white dark:bg-slate-950 pr-10"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-5 w-5" />
+                                            ) : (
+                                                <Eye className="h-5 w-5" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {error && (

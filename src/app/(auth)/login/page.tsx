@@ -1,4 +1,5 @@
 'use client';
+import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/login-form';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
@@ -34,7 +35,9 @@ export default function LoginPage() {
                     {t('login.tagline')}
                 </p>
             </div>
-            <LoginForm />
+            <Suspense fallback={<div className="w-full max-w-md h-[400px] flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                <LoginForm />
+            </Suspense>
         </div>
     );
 }

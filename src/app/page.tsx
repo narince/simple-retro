@@ -35,7 +35,7 @@ export default function Home() {
             >
               {t('header.login')}
             </Link>
-            <Link href="/login">
+            <Link href="/login?mode=signup">
               <Button className="rounded-full bg-slate-900 px-6 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200">
                 {t('login.signup_action')}
               </Button>

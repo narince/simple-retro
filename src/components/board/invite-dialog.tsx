@@ -25,10 +25,14 @@ export function InviteDialog({ open, onOpenChange, boardId, existingMemberIds = 
     const [invitedUsers, setInvitedUsers] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
     const loadUsers = async () => {
-        const allUsers = await dataService.getUsers();
-        // Filter out users who are already members
-        // Actually, let's show them but mark as "Joined"
+        const [allUsers, currentUser] = await Promise.all([
+            dataService.getUsers(),
+            dataService.getCurrentUser()
+        ]);
+        setCurrentUserId(currentUser?.id || null);
         setUsers(allUsers);
     };
 
@@ -50,8 +54,9 @@ export function InviteDialog({ open, onOpenChange, boardId, existingMemberIds = 
     };
 
     const filteredUsers = users.filter(user =>
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        user.id !== currentUserId && // Prevent self-invite
+        (user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     return (

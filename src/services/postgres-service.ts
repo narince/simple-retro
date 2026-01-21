@@ -122,22 +122,30 @@ export class PostgresService implements IDataService {
 
     // --- Boards ---
     async getBoards(teamId: string): Promise<Board[]> {
-        const res = await pool.query('SELECT * FROM boards WHERE team_id = $1 ORDER BY created_at DESC', [teamId]);
+        // Fix: Show boards owned by teamId (user) OR where user is invited
+        // We assume teamId passed here IS the current user's ID for this context
+        const res = await pool.query(
+            `SELECT * FROM boards 
+             WHERE team_id = $1 
+                OR $1 = ANY(allowed_user_ids) 
+             ORDER BY created_at DESC`,
+            [teamId]
+        );
         return res.rows.map(this.mapBoard);
     }
 
     async createBoard(title: string, teamId: string, options?: { initialColumns?: { title: string; color: string }[], maxVotes?: number }): Promise<Board> {
         const id = crypto.randomUUID();
-        // Get user from context or hardcode for now (API route should pass it)
-        const userId = null; // Should come from session
+        // teamId is effectively the owner/creator ID in this app's current architecture
+        // Initialize allowed_user_ids as empty array
 
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
             await client.query(
-                `INSERT INTO boards (id, team_id, title, max_votes, column_colors) VALUES ($1, $2, $3, $4, $5)`,
-                [id, teamId, title, options?.maxVotes, []]
+                `INSERT INTO boards (id, team_id, title, max_votes, column_colors, allowed_user_ids) VALUES ($1, $2, $3, $4, $5, $6)`,
+                [id, teamId, title, options?.maxVotes, [], []]
             );
 
             if (options?.initialColumns) {
@@ -181,10 +189,35 @@ export class PostgresService implements IDataService {
     }
 
     async updateBoard(boardId: string, updates: Partial<Board>): Promise<Board | null> {
-        // Similar dynamic update logic
-        if (Object.keys(updates).length === 0) return this.getBoard(boardId);
-        // Simplified for brevity - assumes full update implementation
-        return this.getBoard(boardId);
+        if (!updates || Object.keys(updates).length === 0) return this.getBoard(boardId);
+
+        // Filter out fields that shouldn't be updated directly or need mapping
+        const safeUpdates = { ...updates };
+        delete (safeUpdates as any).id;
+        delete (safeUpdates as any).created_at;
+
+        // Construct dynamic query
+        const keys = Object.keys(safeUpdates);
+        if (keys.length === 0) return this.getBoard(boardId);
+
+        const setClause = keys.map((k, i) => {
+            // camelCase to snake_case mapping for allowed_user_ids if needed, 
+            // but interface uses allowed_user_ids (snake) mostly? 
+            // Let's check types.ts. The interface seems to use snake_case for this prop usually 
+            // or we need to map. 
+            // Checking mapBoard: allowed_user_ids matches DB column.
+            return `${k} = $${i + 2}`;
+        }).join(', ');
+
+        const values = keys.map(k => (safeUpdates as any)[k]);
+
+        try {
+            await pool.query(`UPDATE boards SET ${setClause} WHERE id = $1`, [boardId, ...values]);
+            return this.getBoard(boardId);
+        } catch (error) {
+            console.error("Update Board Error", error);
+            return null;
+        }
     }
 
     async cloneBoard(boardId: string, newTitle?: string): Promise<Board> {
