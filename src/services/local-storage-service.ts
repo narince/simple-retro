@@ -16,6 +16,10 @@ export const STORAGE_KEYS = {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export class LocalStorageService implements IDataService {
+    async getExportData(): Promise<any> {
+        throw new Error("Export not supported in LocalStorage mode");
+    }
+
     public get<T>(key: string): T[] {
         if (typeof window === 'undefined') return [];
         const item = localStorage.getItem(key);

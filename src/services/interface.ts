@@ -1,5 +1,5 @@
 
-import { User, Board, Column, Card } from './types';
+import { User, Board, Column, Card, ExportData } from './types';
 
 export interface IDataService {
     // Auth
@@ -49,4 +49,5 @@ export interface IDataService {
     updateUserRole(userId: string, role: 'admin' | 'user'): Promise<User | null>;
     createUser(email: string, fullName: string, role: 'admin' | 'user', password?: string): Promise<User>;
     adminUpdateUser(userId: string, updates: Partial<User>): Promise<User | null>;
+    getExportData(): Promise<ExportData>;
 }

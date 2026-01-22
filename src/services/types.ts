@@ -73,3 +73,12 @@ export interface Card {
     color?: string; // Hex or tailwind class
     created_at: string;
 }
+
+// Export Data Structure
+export interface ExportData {
+    users: User[];
+    boards: Board[];
+    columns: Column[];
+    cards: Card[];
+    reactions: any[]; // Or specific Reaction type
+}

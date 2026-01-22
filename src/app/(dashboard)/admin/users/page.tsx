@@ -149,6 +149,21 @@ export default function AdminUsersPage() {
 
     if (isLoading) return <div className="p-8">{t('board.loading')}</div>;
 
+    // Export State
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            await dataExportService.exportDatabase();
+        } catch (error) {
+            console.error("Export error", error);
+            alert("Export failed");
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className="p-8 max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
@@ -163,9 +178,18 @@ export default function AdminUsersPage() {
                         {t('admin.total_users', { count: users.length })}
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" onClick={() => dataExportService.exportDatabase()} className="gap-2 dark:bg-zinc-900 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-zinc-800 whitespace-nowrap px-4">
-                            <Download className="w-4 h-4" />
-                            {t('admin.export_excel')}
+                        <Button
+                            variant="outline"
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            className="gap-2 dark:bg-zinc-900 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-zinc-800 whitespace-nowrap px-4"
+                        >
+                            {isExporting ? (
+                                <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                            ) : (
+                                <Download className="w-4 h-4" />
+                            )}
+                            {isExporting ? "Exporting..." : t('admin.export_excel')}
                         </Button>
                         <Button onClick={() => setIsCreateOpen(true)} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap px-4">
                             <Plus className="w-4 h-4" />

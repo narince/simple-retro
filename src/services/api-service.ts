@@ -302,4 +302,12 @@ export class ApiService implements IDataService {
             body: JSON.stringify({ boardId, emoji, userId, reactionId })
         });
     }
+
+    async getExportData(): Promise<any> {
+        const res = await fetch(`${API_BASE}/admin/export`);
+        if (!res.ok) throw new Error("Export failed");
+        return res.json();
+    }
 }
+
+export const apiService = new ApiService();
