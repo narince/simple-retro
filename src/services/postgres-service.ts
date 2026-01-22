@@ -51,6 +51,7 @@ export class PostgresService implements IDataService {
 
     async getUsers(): Promise<User[]> {
         const res = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
+        console.log(`[PostgresService] getUsers found ${res.rows.length} users`);
         return res.rows.map(this.mapUser);
     }
 
@@ -233,8 +234,13 @@ export class PostgresService implements IDataService {
 
     // --- Cards ---
     async getCards(columnId: string): Promise<Card[]> {
-        const res = await pool.query('SELECT * FROM cards WHERE column_id = $1 ORDER BY order_index ASC, created_at DESC', [columnId]);
-        return res.rows.map(this.mapCard);
+        try {
+            const res = await pool.query('SELECT * FROM cards WHERE column_id = $1 ORDER BY order_index ASC, created_at DESC', [columnId]);
+            return res.rows.map(this.mapCard);
+        } catch (error) {
+            console.error("Postgres getCards Error:", error);
+            throw error;
+        }
     }
 
     async createCard(columnId: string, content: string, authorId: string, options?: any): Promise<Card> {
