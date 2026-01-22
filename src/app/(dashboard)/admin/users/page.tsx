@@ -43,6 +43,9 @@ export default function AdminUsersPage() {
     // Delete User State
     const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
+    // Export State
+    const [isExporting, setIsExporting] = useState(false);
+
     useEffect(() => {
         // Protect route
         const checkAccess = async () => {
@@ -149,8 +152,7 @@ export default function AdminUsersPage() {
 
     if (isLoading) return <div className="p-8">{t('board.loading')}</div>;
 
-    // Export State
-    const [isExporting, setIsExporting] = useState(false);
+
 
     const handleExport = async () => {
         setIsExporting(true);
