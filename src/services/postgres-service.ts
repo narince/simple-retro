@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 // Use NEON connection string from environment variable
-const connectionString = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({
     connectionString,
