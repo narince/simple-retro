@@ -1,18 +1,19 @@
-
 import { IDataService } from './interface';
 import { User, Board, Column, Card, Comment, ExportData } from './types';
-import { Pool } from 'pg';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 // Use NEON connection string from environment variable
 const connectionString = process.env.DATABASE_URL;
 
+// Configure Neon to use the ws package in Node.js environment
+neonConfig.webSocketConstructor = ws;
+
 const pool = new Pool({
     connectionString,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: true,
 });
 
 export class PostgresService implements IDataService {
