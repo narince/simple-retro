@@ -38,7 +38,6 @@ create table if not exists columns (
 );
 
 -- CARDS
-create table if not exists cards (
   id text primary key,
   column_id text references columns(id) on delete cascade not null,
   content text not null,
@@ -49,6 +48,8 @@ create table if not exists cards (
   votes integer default 0,
   voted_user_ids text[], -- Array of user IDs
   color text,
+  order_index integer default 0,
+  comments jsonb default '[]'::jsonb, -- Added missing comments field too as per Types
   created_at timestamp with time zone default now()
 );
 
@@ -61,6 +62,12 @@ create table if not exists comments (
   created_at timestamp with time zone default now()
 );
 
--- REACTIONS (For avoiding spam logic persistence if needed, though usually ephemeral)
--- Skipping for now as it uses local storage broadcast mostly, but good to have if we want to sync history.
+-- REACTIONS
+create table if not exists reactions (
+  id text primary key,
+  board_id text references boards(id) on delete cascade not null,
+  emoji text not null,
+  user_id text,
+  created_at timestamp with time zone default now()
+);
 
