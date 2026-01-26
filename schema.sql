@@ -38,6 +38,7 @@ create table if not exists columns (
 );
 
 -- CARDS
+create table if not exists cards (
   id text primary key,
   column_id text references columns(id) on delete cascade not null,
   content text not null,

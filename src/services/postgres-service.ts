@@ -154,13 +154,27 @@ export class PostgresService implements IDataService {
 
         // Initial columns?
         if (options?.initialColumns) {
+            const colors: string[] = [];
             for (const col of options.initialColumns) {
-                await this.createColumn(id, col.title); // We lose color info in basic createColumn signature, assume default
+                await this.createColumn(id, col.title, col.color);
+                if (col.color) colors.push(col.color);
+            }
+            // Update board with colors for dashboard preview
+            if (colors.length > 0) {
+                await pool.query('UPDATE boards SET column_colors = $1 WHERE id = $2', [colors, id]);
             }
         } else {
-            await this.createColumn(id, 'Went Well');
-            await this.createColumn(id, 'To Improve');
-            await this.createColumn(id, 'Action Items');
+            const defaults = [
+                { title: 'Went Well', color: 'bg-green-600' },
+                { title: 'To Improve', color: 'bg-rose-600' },
+                { title: 'Action Items', color: 'bg-violet-600' }
+            ];
+            const colors: string[] = [];
+            for (const col of defaults) {
+                await this.createColumn(id, col.title, col.color);
+                colors.push(col.color);
+            }
+            await pool.query('UPDATE boards SET column_colors = $1 WHERE id = $2', [colors, id]);
         }
 
         return this.mapBoard(res.rows[0]);
@@ -207,7 +221,7 @@ export class PostgresService implements IDataService {
         return res.rows.map(this.mapColumn);
     }
 
-    async createColumn(boardId: string, title: string): Promise<Column> {
+    async createColumn(boardId: string, title: string, color?: string): Promise<Column> {
         const id = crypto.randomUUID();
         // Get max order
         const ord = await pool.query('SELECT MAX(order_index) as m FROM columns WHERE board_id = $1', [boardId]);
@@ -215,7 +229,7 @@ export class PostgresService implements IDataService {
 
         const res = await pool.query(
             'INSERT INTO columns (id, board_id, title, order_index, color, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
-            [id, boardId, title, nextOrder, 'bg-slate-500']
+            [id, boardId, title, nextOrder, color || 'bg-slate-500']
         );
         return this.mapColumn(res.rows[0]);
     }
@@ -292,20 +306,24 @@ export class PostgresService implements IDataService {
         const id = crypto.randomUUID();
         const newComment = { id, text, author_id: authorId, created_at: new Date().toISOString() };
 
+        // Use COALESCE to handle null comments array -> default to []
         await pool.query(
-            'UPDATE cards SET comments = comments || $1::jsonb WHERE id = $2',
+            'UPDATE cards SET comments = COALESCE(comments, \'[]\'::jsonb) || $1::jsonb WHERE id = $2',
             [JSON.stringify(newComment), cardId]
         );
     }
 
     async deleteComment(cardId: string, commentId: string): Promise<void> {
         // Remove from JSONB array
-        // Advanced Postgres JSON query required
+        // Use COALESCE to prevent NULL result when array becomes empty
         await pool.query(
             `UPDATE cards 
-             SET comments = (SELECT jsonb_agg(elem) 
-                             FROM jsonb_array_elements(comments) elem 
-                             WHERE elem->>'id' <> $1)
+             SET comments = COALESCE(
+                (SELECT jsonb_agg(elem) 
+                 FROM jsonb_array_elements(comments) elem 
+                 WHERE elem->>'id' <> $1),
+                '[]'::jsonb
+             )
              WHERE id = $2`,
             [commentId, cardId]
         );
