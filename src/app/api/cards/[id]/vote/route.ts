@@ -1,0 +1,16 @@
+import { NextResponse } from 'next/server';
+import { serverDataService } from '@/services/server';
+
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const body = await request.json();
+        const { userId } = body;
+
+        await serverDataService.voteCard(params.id, userId);
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
+    }
+}
