@@ -215,7 +215,7 @@ export class PostgresService implements IDataService {
 
         const res = await pool.query(
             'INSERT INTO columns (id, board_id, title, order_index, color, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
-            [id, boardId, title, nextOrder, 'bg-slate-200']
+            [id, boardId, title, nextOrder, 'bg-slate-500']
         );
         return this.mapColumn(res.rows[0]);
     }
