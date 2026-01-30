@@ -430,8 +430,8 @@ export default function BoardPage() {
                     onSubmit={handleAddColumn}
                 />
 
-                <div className={cn("flex-1 p-2 sm:p-6 overflow-x-auto overflow-y-hidden", isPresentationMode && "p-0")}>
-                    <div className="flex gap-4 sm:gap-6 h-full pb-4 items-start w-max md:w-full md:items-stretch">
+                <div className={cn("flex-1 p-2 sm:p-6 overflow-x-hidden overflow-y-auto md:overflow-x-auto md:overflow-y-hidden", isPresentationMode && "p-0")}>
+                    <div className="flex flex-col md:flex-row gap-4 sm:gap-6 h-full pb-4 items-stretch w-full">
                         <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
                             {columns.map(col => (
                                 <BoardColumn
