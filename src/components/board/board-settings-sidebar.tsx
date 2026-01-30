@@ -24,11 +24,13 @@ export function BoardSettingsSidebar({ isOpen, onClose, boardId }: BoardSettings
         maxVotesPerUser, setMaxVotesPerUser,
         isContentBlur, setIsContentBlur,
         maxVotesScope, setMaxVotesScope,
-        featureFlags, setFeatureFlag
+        featureFlags, setFeatureFlag,
+        isPresentationMode, setIsPresentationMode, // Connected to store
+        isHighlightMode, setIsHighlightMode // Connected to store
     } = useAppStore();
 
-    const [isPresentationMode, setIsPresentationMode] = useState(false);
-    const [isHighlightMode, setIsHighlightMode] = useState(false);
+    // const [isPresentationMode, setIsPresentationMode] = useState(false); // REMOVED local state
+    // const [isHighlightMode, setIsHighlightMode] = useState(false); // REMOVED local state
 
     // Prevent scrolling when open
     useEffect(() => {

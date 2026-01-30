@@ -40,6 +40,9 @@ interface AppState {
 
     isPresentationMode: boolean;
     setIsPresentationMode: (mode: boolean) => void;
+
+    isHighlightMode: boolean;
+    setIsHighlightMode: (mode: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -87,6 +90,9 @@ export const useAppStore = create<AppState>((set) => ({
 
     isPresentationMode: false,
     setIsPresentationMode: (mode) => set({ isPresentationMode: mode }),
+
+    isHighlightMode: false,
+    setIsHighlightMode: (mode) => set({ isHighlightMode: mode }),
 }));
 
 // Initialize language logic moved to components to avoid hydration mismatch

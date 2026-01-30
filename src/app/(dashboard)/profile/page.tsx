@@ -141,14 +141,15 @@ export default function ProfilePage() {
                     </h1>
 
                     <div className="flex flex-col items-center mb-8">
+                        {/* Hidden input moved outside to prevent event bubbling loop */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleAvatarUpload}
+                        />
                         <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleAvatarUpload}
-                            />
                             <div className={cn(
                                 "h-24 w-24 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-inner flex items-center justify-center bg-slate-100",
                                 isUploading && "opacity-50"
