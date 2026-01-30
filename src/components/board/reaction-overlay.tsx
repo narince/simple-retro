@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Heart, Flame, ThumbsUp, PartyPopper, Star, Zap } from "lucide-react";
 import { dataService } from "@/services";
+import { triggerVisualReaction, ReactionType } from '@/lib/reactions';
 
 // Helper to map emoji/key to Icon component
 const getReactionIcon = (emoji: string) => {
@@ -40,9 +41,16 @@ export function ReactionOverlay() {
 
     useEffect(() => {
         const addShower = (emoji: string) => {
+            // Check for Special Center Reactions
+            const specials = ['applause', 'rocket', 'bulb', 'star', 'gem'];
+            if (specials.includes(emoji)) {
+                // Trigger the sophisticated center animation
+                triggerVisualReaction(emoji as ReactionType);
+                return;
+            }
+
             const count = 100;
             const newReactions: Reaction[] = [];
-
             // Standard Confetti Logic
             for (let i = 0; i < count; i++) {
                 const id = Math.random().toString(36).substring(7) + i;
@@ -118,7 +126,7 @@ export function ReactionOverlay() {
             window.removeEventListener('retro-reaction', handleCustom);
             clearInterval(pollInterval);
         };
-    }, [currentUserId]); // Re-bind when user ID loads
+    }, [currentUserId]);
 
     return (
         <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">

@@ -220,16 +220,34 @@ export const triggerVisualReaction = (type: ReactionType) => {
         };
 
     } else if (type === 'gem') {
-        // Premium feel: Blue/Purple/Cyan
+        // Center Diamond with Shine
+        const gem = createCenteredElement('💎', '140px');
+        gem.style.filter = 'drop-shadow(0 0 40px rgba(59, 130, 246, 0.8))';
+
+        const animation = gem.animate([
+            { transform: 'translate(-50%, -50%) scale(0) rotate(-45deg)', opacity: 0 },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.1 },
+            { transform: 'translate(-50%, -50%) scale(1.1) rotate(5deg)', opacity: 1, offset: 0.3 }, // Shine 1
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.4 },
+            { transform: 'translate(-50%, -50%) scale(1.1) rotate(-5deg)', opacity: 1, offset: 0.5 }, // Shine 2
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.6 },
+            { transform: 'translate(-50%, -50%) scale(3) rotate(0deg)', opacity: 0, offset: 1 }
+        ], { duration: 2500, easing: 'ease-out', fill: 'forwards' });
+
+        // Sparkles (Confetti burst)
         confetti({
-            particleCount: 100,
-            spread: 160,
-            origin: { y: 0.6 },
-            colors: ['#8b5cf6', '#3b82f6', '#06b6d4'],
-            shapes: ['square'],
-            scalar: 1.2,
-            flat: true
+            particleCount: 50,
+            spread: 90,
+            origin: { x: 0.5, y: 0.5 },
+            colors: ['#60a5fa', '#3b82f6', '#ffffff'],
+            shapes: ['star'], // Stars fit gem theme
+            startVelocity: 30,
+            gravity: 0.5,
+            scalar: 0.7,
+            ticks: 50
         });
+
+        animation.onfinish = () => gem.remove();
 
     } else {
         // Celebrate (Default)

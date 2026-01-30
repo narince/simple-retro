@@ -29,11 +29,45 @@ export function BoardDialog({ open, onOpenChange, onSubmit, initialTitle = "", m
 
     // Dynamic templates based on language
     const TEMPLATES = [
-        { id: 'start-stop-continue', name: t('templates.start_stop_continue') },
-        { id: 'mad-sad-glad', name: t('templates.mad_sad_glad') },
-        { id: 'lean-coffee', name: t('templates.lean_coffee') },
-        { id: 'went-well-to-improve', name: t('templates.went_well_to_improve') },
+        {
+            id: 'went-well-to-improve',
+            name: t('templates.went_well_to_improve'),
+            columns: [
+                { title: t('templates.column.went_well'), color: 'bg-green-50 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' },
+                { title: t('templates.column.to_improve'), color: 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800' },
+                { title: t('templates.column.action_items'), color: 'bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-800' }
+            ]
+        },
+        {
+            id: 'start-stop-continue',
+            name: t('templates.start_stop_continue'),
+            columns: [
+                { title: t('templates.column.start'), color: 'bg-teal-50 text-teal-800 border-teal-200 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-800' },
+                { title: t('templates.column.stop'), color: 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800' },
+                { title: t('templates.column.continue'), color: 'bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-800' }
+            ]
+        },
+        {
+            id: 'mad-sad-glad',
+            name: t('templates.mad_sad_glad'),
+            columns: [
+                { title: t('templates.column.mad'), color: 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-800' },
+                { title: t('templates.column.sad'), color: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' },
+                { title: t('templates.column.glad'), color: 'bg-green-50 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' }
+            ]
+        },
+        {
+            id: 'lean-coffee',
+            name: t('templates.lean_coffee'),
+            columns: [
+                { title: t('templates.column.to_discuss'), color: 'bg-slate-50 text-slate-800 border-slate-200 dark:bg-slate-950/30 dark:text-slate-400 dark:border-slate-800' },
+                { title: t('templates.column.discussing'), color: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' },
+                { title: t('templates.column.done'), color: 'bg-green-50 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' }
+            ]
+        },
     ];
+
+    const selectedTemplate = TEMPLATES.find(t => t.id === templateId) || TEMPLATES[0];
 
     useEffect(() => {
         if (open) {
@@ -86,17 +120,18 @@ export function BoardDialog({ open, onOpenChange, onSubmit, initialTitle = "", m
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="dark:bg-zinc-950 dark:border-slate-800">
-                                            <SelectItem value="went-well-to-improve">{t('templates.went_well_to_improve')}</SelectItem>
-                                            <SelectItem value="start-stop-continue">{t('templates.start_stop_continue')}</SelectItem>
-                                            <SelectItem value="mad-sad-glad">{t('templates.mad_sad_glad')}</SelectItem>
-                                            <SelectItem value="lean-coffee">{t('templates.lean_coffee')}</SelectItem>
+                                            {TEMPLATES.map(tmpl => (
+                                                <SelectItem key={tmpl.id} value={tmpl.id}>{tmpl.name}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     {/* Template Preview */}
                                     <div className="mt-2 flex gap-2">
-                                        <div className="flex-1 p-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded text-center text-xs font-semibold text-green-800 dark:text-green-400">{t('templates.column.went_well')}</div>
-                                        <div className="flex-1 p-2 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded text-center text-xs font-semibold text-rose-800 dark:text-rose-400">{t('templates.column.to_improve')}</div>
-                                        <div className="flex-1 p-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded text-center text-xs font-semibold text-violet-800 dark:text-violet-400">{t('templates.column.action_items')}</div>
+                                        {selectedTemplate.columns.map((col, i) => (
+                                            <div key={i} className={`flex-1 p-2 border rounded text-center text-xs font-semibold ${col.color}`}>
+                                                {col.title}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
