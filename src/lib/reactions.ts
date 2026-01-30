@@ -110,16 +110,57 @@ export const triggerVisualReaction = (type: ReactionType) => {
             }
         }());
     } else if (type === 'rocket') {
-        // Upward burst from center
-        confetti({
-            particleCount: 150,
-            spread: 10,
-            origin: { y: 1 },
-            startVelocity: 60,
-            colors: ['#ef4444', '#e2e8f0'], // Red and White
-            gravity: 0.2,
-            ticks: 100
+        const rocket = document.createElement('div');
+        rocket.textContent = '🚀';
+        rocket.style.position = 'fixed';
+        rocket.style.left = '50%';
+        rocket.style.top = '50%';
+        rocket.style.transform = 'translate(-50%, -50%) scale(0.5)';
+        rocket.style.fontSize = '80px';
+        rocket.style.opacity = '0';
+        rocket.style.transition = 'all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        rocket.style.zIndex = '9999';
+        rocket.style.pointerEvents = 'none';
+        rocket.style.filter = 'drop-shadow(0 0 20px rgba(255,100,0,0.5))'; // Glow
+        document.body.appendChild(rocket);
+
+        // Trigger animation next frame
+        requestAnimationFrame(() => {
+            rocket.style.transform = 'translate(-50%, -50%) scale(8)'; // Fly towards screen
+            rocket.style.opacity = '1';
         });
+
+        // Fire effect acting as propulsion
+        const fireDuration = 1500;
+        const fireEnd = Date.now() + fireDuration;
+
+        const fireInterval = setInterval(() => {
+            const timeLeft = fireEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(fireInterval);
+
+            // Fire particles generated from the center (behind the rocket)
+            confetti({
+                particleCount: 15,
+                startVelocity: 20,
+                spread: 30, // Narrow exhaust
+                origin: { x: 0.5, y: 0.55 }, // Slightly below center
+                colors: ['#ef4444', '#f97316', '#fbbf24', '#ffffff'], // Red, Orange, Amber, White heat
+                shapes: ['circle'],
+                scalar: 0.8,
+                gravity: 0.8, // Fall down away from rocket
+                drift: 0,
+                ticks: 40,
+                zIndex: 9998 // Behind rocket
+            });
+        }, 50);
+
+        // Cleanup
+        setTimeout(() => {
+            rocket.style.opacity = '0';
+            setTimeout(() => {
+                if (rocket.parentNode) rocket.parentNode.removeChild(rocket);
+            }, 500);
+        }, 2000);
     } else if (type === 'bulb') {
         // Idea / Light: Center burst of yellow/white
         confetti({
