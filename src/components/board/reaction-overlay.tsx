@@ -41,11 +41,19 @@ export function ReactionOverlay() {
 
     useEffect(() => {
         const addShower = (emoji: string) => {
-            // Check for Special Center Reactions
-            const specials = ['applause', 'rocket', 'bulb', 'star', 'gem'];
-            if (specials.includes(emoji)) {
+            // Map Emoji to Special Reaction Type
+            const SPECIAL_MAP: Record<string, ReactionType> = {
+                '👏': 'applause',
+                '🚀': 'rocket',
+                '💡': 'bulb',
+                '⭐': 'star',
+                '💎': 'gem'
+            };
+
+            const specialType = SPECIAL_MAP[emoji];
+            if (specialType) {
                 // Trigger the sophisticated center animation
-                triggerVisualReaction(emoji as ReactionType);
+                triggerVisualReaction(specialType);
                 return;
             }
 
