@@ -98,7 +98,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
         }());
     } else if (type === 'applause') {
         // Floating Claps (Medium-style) - Intensified
-        const clapCount = 35; // Increased from 15
+        const clapCount = 60; // Increased even more
         const duration = 2500;
 
         for (let i = 0; i < clapCount; i++) {
