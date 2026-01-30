@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Search, ArrowUpDown, Eye, EyeOff, Timer, ChevronDown,
-    Settings, Columns, Plus, Smile, Trash2, Cloud
+    Settings, Columns, Plus, Smile, Trash2, Cloud, MoreHorizontal
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -117,8 +117,8 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                     />
                 </div>
 
-                {/* Sort */}
-                <div className="flex items-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-zinc-900 overflow-hidden">
+                {/* Sort - Desktop Only */}
+                <div className="hidden md:flex items-center border border-slate-200 dark:border-slate-800 rounded-md bg-slate-50 dark:bg-zinc-900 overflow-hidden">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -139,21 +139,21 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                     </Button>
                 </div>
 
-                {/* Blur Toggle */}
+                {/* Blur Toggle - Desktop Only */}
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={cn("h-9 w-9", isContentBlur ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-slate-400 dark:text-slate-500 dark:hover:text-slate-300")}
+                    className={cn("h-9 w-9 hidden md:flex", isContentBlur ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-slate-400 dark:text-slate-500 dark:hover:text-slate-300")}
                     onClick={() => setIsContentBlur(!isContentBlur)}
                     title={isContentBlur ? "Reveal Content" : "Blur Content"}
                 >
                     {isContentBlur ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
 
-                {/* Reactions */}
+                {/* Reactions - Desktop Only */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 dark:text-slate-500 hover:text-yellow-500 dark:hover:text-yellow-400">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 dark:text-slate-500 hover:text-yellow-500 dark:hover:text-yellow-400 hidden md:flex">
                             <Smile className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
@@ -182,10 +182,11 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
 
                 {/* Invite & Members */}
                 <div className="flex items-center gap-1 mx-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                    {/* Desktop Invite Button */}
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 px-2"
+                        className="h-8 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 hover:text-blue-700 dark:hover:text-blue-300 px-2 hidden md:flex"
                         onClick={onInvite}
                     >
                         <span className="text-xs font-semibold">+ {t('board.invite')}</span>
@@ -305,15 +306,65 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Settings Button */}
+                {/* Settings Button - Desktop Only */}
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 ml-1"
+                    className="h-9 w-9 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 ml-1 hidden md:flex"
                     onClick={() => setIsSettingsOpen(true)}
                 >
                     <Settings className="h-4 w-4" />
                 </Button>
+
+                {/* Mobile Menu (Consolidated Actions) */}
+                <div className="md:hidden">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-600 dark:text-slate-400">
+                                <MoreHorizontal className="h-5 w-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="dark:bg-zinc-950 dark:border-slate-800 min-w-[200px]">
+                            {/* Invite Mobile */}
+                            <DropdownMenuItem onClick={onInvite} className="gap-2 cursor-pointer">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30">
+                                    <Plus className="h-3 w-3" />
+                                </span>
+                                <span>{t('board.invite')}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+
+                            {/* Sort Options */}
+                            <DropdownMenuItem onClick={() => onSort('order')} className="gap-2 cursor-pointer">
+                                <Columns className="h-4 w-4" />
+                                <span>{t('board.sort_order')}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onSort('votes')} className="gap-2 cursor-pointer">
+                                <ArrowUpDown className="h-4 w-4" />
+                                <span>{t('board.sort_votes')}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+
+                            {/* Blur */}
+                            <DropdownMenuItem onClick={() => setIsContentBlur(!isContentBlur)} className="gap-2 cursor-pointer">
+                                {isContentBlur ? <EyeOff className="h-4 w-4 text-blue-500" /> : <Eye className="h-4 w-4" />}
+                                <span>{isContentBlur ? "Reveal Content" : "Blur Content"}</span>
+                            </DropdownMenuItem>
+
+                            {/* Settings */}
+                            <DropdownMenuItem onClick={() => setIsSettingsOpen(true)} className="gap-2 cursor-pointer">
+                                <Settings className="h-4 w-4" />
+                                <span>Settings</span>
+                            </DropdownMenuItem>
+
+                            {/* Timer */}
+                            <DropdownMenuItem onClick={() => setIsTimerOpen(!isTimerOpen)} className="gap-2 cursor-pointer">
+                                <Timer className="h-4 w-4" />
+                                <span>{t('board.timer')}</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
                 <BoardSettingsSidebar isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} boardId={boardId} />
                 <TimerWidget open={isTimerOpen} onOpenChange={setIsTimerOpen} />
