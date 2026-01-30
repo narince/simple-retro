@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
     };
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
                 <div className="max-w-2xl">
                     <h1 className="text-2xl font-bold flex items-center gap-2 dark:text-slate-100">
@@ -201,7 +201,7 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden">
+            <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow className="dark:border-slate-800 dark:hover:bg-zinc-900/50">
