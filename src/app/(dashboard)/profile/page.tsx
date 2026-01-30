@@ -141,20 +141,16 @@ export default function ProfilePage() {
                     </h1>
 
                     <div className="flex flex-col items-center mb-8">
-                        {/* Hidden input - using ID for label association to prevent loop */}
-                        <input
-                            type="file"
-                            id="avatar-upload"
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                        />
+                        {/* Avatar Trigger Area */}
 
-                        {/* Use label instead of div with onClick to handle file input robustly */}
-                        <label
-                            htmlFor="avatar-upload"
-                            className="relative group cursor-pointer block"
+                        {/* Profile Image with Overlay */}
+                        <div
+                            className="relative group cursor-pointer"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                fileInputRef.current?.click();
+                            }}
                         >
                             <div className={cn(
                                 "h-24 w-24 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-inner flex items-center justify-center bg-slate-100",
@@ -177,15 +173,21 @@ export default function ProfilePage() {
                                     <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                                 </div>
                             )}
-                        </label>
+                        </div>
 
-                        {/* Text Button also acting as label */}
-                        <label
-                            htmlFor="avatar-upload"
-                            className="mt-2 text-sm text-blue-600 font-medium cursor-pointer hover:text-blue-700 hover:underline"
+                        {/* Text Button */}
+                        <Button
+                            variant="link"
+                            size="sm"
+                            className="mt-2 text-blue-600"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                fileInputRef.current?.click();
+                            }}
                         >
                             {t('profile.change_photo')}
-                        </label>
+                        </Button>
                         {message && (
                             <p className={cn(
                                 "mt-2 text-sm font-medium animate-in fade-in slide-in-from-top-1",
@@ -224,6 +226,16 @@ export default function ProfilePage() {
                     </form>
                 </div>
             </div>
+
+            {/* Isolated Hidden Input */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                onClick={(e) => e.stopPropagation()} // Stop bubbling from input itself
+            />
 
             <ImageCropper
                 open={cropperOpen}
