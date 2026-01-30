@@ -141,15 +141,21 @@ export default function ProfilePage() {
                     </h1>
 
                     <div className="flex flex-col items-center mb-8">
-                        {/* Hidden input moved outside to prevent event bubbling loop */}
+                        {/* Hidden input - using ID for label association to prevent loop */}
                         <input
                             type="file"
+                            id="avatar-upload"
                             ref={fileInputRef}
                             className="hidden"
                             accept="image/*"
                             onChange={handleAvatarUpload}
                         />
-                        <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+
+                        {/* Use label instead of div with onClick to handle file input robustly */}
+                        <label
+                            htmlFor="avatar-upload"
+                            className="relative group cursor-pointer block"
+                        >
                             <div className={cn(
                                 "h-24 w-24 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-inner flex items-center justify-center bg-slate-100",
                                 isUploading && "opacity-50"
@@ -171,10 +177,15 @@ export default function ProfilePage() {
                                     <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                                 </div>
                             )}
-                        </div>
-                        <Button variant="link" size="sm" className="mt-2 text-blue-600" onClick={() => fileInputRef.current?.click()}>
+                        </label>
+
+                        {/* Text Button also acting as label */}
+                        <label
+                            htmlFor="avatar-upload"
+                            className="mt-2 text-sm text-blue-600 font-medium cursor-pointer hover:text-blue-700 hover:underline"
+                        >
                             {t('profile.change_photo')}
-                        </Button>
+                        </label>
                         {message && (
                             <p className={cn(
                                 "mt-2 text-sm font-medium animate-in fade-in slide-in-from-top-1",
