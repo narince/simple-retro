@@ -204,7 +204,76 @@ export class PostgresService implements IDataService {
     }
 
     async cloneBoard(boardId: string, newTitle?: string): Promise<Board> {
-        throw new Error("Method not implemented.");
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // 1. Get original board
+            const boardRes = await client.query('SELECT * FROM boards WHERE id = $1', [boardId]);
+            if (boardRes.rows.length === 0) throw new Error("Board not found");
+            const originalBoard = boardRes.rows[0];
+
+            // 2. Create new board
+            const newBoardId = crypto.randomUUID();
+            const title = newTitle || `${originalBoard.title} (Clone)`;
+            const newBoardRes = await client.query(
+                `INSERT INTO boards (
+                    id, team_id, title, max_votes, column_colors, allowed_user_ids, 
+                    is_locked, are_votes_hidden, are_cards_hidden, is_voting_disabled,
+                    is_gifs_enabled, is_reactions_enabled, is_comments_enabled, created_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()) RETURNING *`,
+                [
+                    newBoardId, originalBoard.team_id, title, originalBoard.max_votes, originalBoard.column_colors, originalBoard.allowed_user_ids,
+                    false, originalBoard.are_votes_hidden, originalBoard.are_cards_hidden, false,
+                    originalBoard.is_gifs_enabled, originalBoard.is_reactions_enabled, originalBoard.is_comments_enabled
+                ]
+            );
+
+            // 3. Clone Columns
+            const colsRes = await client.query('SELECT * FROM columns WHERE board_id = $1 ORDER BY order_index', [boardId]);
+            const columnMap = new Map<string, string>(); // OldID -> NewID
+
+            for (const col of colsRes.rows) {
+                const newColId = crypto.randomUUID();
+                columnMap.set(col.id, newColId);
+                await client.query(
+                    'INSERT INTO columns (id, board_id, title, color, order_index, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+                    [newColId, newBoardId, col.title, col.color, col.order_index]
+                );
+            }
+
+            // 4. Clone Cards
+            const cardsRes = await client.query(
+                'SELECT * FROM cards WHERE column_id = ANY($1)',
+                [colsRes.rows.map(c => c.id)]
+            );
+
+            for (const card of cardsRes.rows) {
+                const newColId = columnMap.get(card.column_id);
+                if (newColId) {
+                    const newCardId = crypto.randomUUID();
+                    await client.query(
+                        `INSERT INTO cards (
+                            id, column_id, content, author_id, author_full_name, author_avatar_url, 
+                            is_anonymous, color, order_index, created_at
+                        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+                        [
+                            newCardId, newColId, card.content, card.author_id, card.author_full_name, card.author_avatar_url,
+                            card.is_anonymous, card.color, card.order_index
+                        ]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            return this.mapBoard(newBoardRes.rows[0]);
+
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
     }
 
     async inviteUserToBoard(boardId: string, userId: string): Promise<void> {
@@ -408,7 +477,13 @@ export class PostgresService implements IDataService {
             column_colors: row.column_colors || [],
             are_votes_hidden: row.are_votes_hidden,
             is_locked: row.is_locked,
-            is_archived: row.is_archived
+            is_archived: row.is_archived,
+            are_cards_hidden: row.are_cards_hidden,
+            is_voting_disabled: row.is_voting_disabled,
+            is_gifs_enabled: row.is_gifs_enabled,
+            is_reactions_enabled: row.is_reactions_enabled,
+            is_comments_enabled: row.is_comments_enabled,
+            password: row.password_hash ? '********' : undefined // Don't send hash, just indicator
         };
     }
 

@@ -29,6 +29,7 @@ import { Board, Column, Card } from '@/services/types';
 import { useAppStore } from '@/lib/store';
 
 import { useTranslation } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 export default function BoardPage() {
     const { t } = useTranslation();
@@ -50,6 +51,7 @@ export default function BoardPage() {
 
     // Calculate User Votes
     const maxVotes = useAppStore(s => s.maxVotesPerUser);
+    const isPresentationMode = useAppStore(s => s.isPresentationMode); // Add this
     const currentUserVotes = cards.reduce((acc, card) => {
         if (currentUser && card.voted_user_ids?.includes(currentUser.id)) {
             return acc + 1;
@@ -98,7 +100,19 @@ export default function BoardPage() {
             const allUsers = await dataService.getUsers();
 
             if (loadedBoard.allowed_user_ids && loadedBoard.allowed_user_ids.length > 0) {
-                const members = allUsers.filter(u => loadedBoard.allowed_user_ids?.includes(u.id));
+                let members = allUsers.filter(u => loadedBoard.allowed_user_ids?.includes(u.id));
+
+                // Ensure Owner is included
+                if (loadedBoard.owner_id && !members.find(u => u.id === loadedBoard.owner_id)) {
+                    const owner = allUsers.find(u => u.id === loadedBoard.owner_id);
+                    if (owner) members.push(owner);
+                }
+
+                // Ensure Current User is included (if they have access, which they do if they are here)
+                if (currentUser && !members.find(u => u.id === currentUser.id)) {
+                    members.push(currentUser);
+                }
+
                 setMemberDetails(members);
             } else {
                 // For legacy/public boards, assume at least the current user is present
@@ -344,24 +358,27 @@ export default function BoardPage() {
             onDragEnd={handleDragEnd}
         >
             <div className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 min-h-screen">
-                <BoardToolbar
-                    onAddCard={() => {
-                        setIsAddCardOpen(true);
-                        setSelectedColumnId(undefined);
-                    }}
-                    onAddColumn={() => setIsAddColumnOpen(true)}
-                    onSearch={setSearchQuery}
-                    onSort={setSortBy}
-                    boardTitle={board?.title || "Loading..."}
-                    onUpdateBoardTitle={handleUpdateBoardTitle}
-                    onDeleteBoard={handleDeleteBoard}
-                    boardId={board?.id}
-                    onInvite={() => setIsInviteOpen(true)}
-                    members={memberDetails}
-                    activeUserFilter={activeUserFilter}
-                    onMemberClick={handleMemberClick}
-                    currentUser={currentUser}
-                />
+                {/* HIDE TOOLBAR IN PRESENTATION MODE */}
+                {!isPresentationMode && (
+                    <BoardToolbar
+                        onAddCard={() => {
+                            setIsAddCardOpen(true);
+                            setSelectedColumnId(undefined);
+                        }}
+                        onAddColumn={() => setIsAddColumnOpen(true)}
+                        onSearch={setSearchQuery}
+                        onSort={setSortBy}
+                        boardTitle={board?.title || "Loading..."}
+                        onUpdateBoardTitle={handleUpdateBoardTitle}
+                        onDeleteBoard={handleDeleteBoard}
+                        boardId={board?.id}
+                        onInvite={() => setIsInviteOpen(true)}
+                        members={memberDetails}
+                        activeUserFilter={activeUserFilter}
+                        onMemberClick={handleMemberClick}
+                        currentUser={currentUser}
+                    />
+                )}
 
                 <InviteDialog
                     open={isInviteOpen}
@@ -413,7 +430,7 @@ export default function BoardPage() {
                     onSubmit={handleAddColumn}
                 />
 
-                <div className="flex-1 p-6 overflow-x-auto overflow-y-hidden">
+                <div className={cn("flex-1 p-6 overflow-x-auto overflow-y-hidden", isPresentationMode && "p-0")}>
                     <div className="flex gap-6 h-full min-w-max pb-4">
                         <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
                             {columns.map(col => (
@@ -428,10 +445,10 @@ export default function BoardPage() {
                                     onDeleteColumn={() => handleDeleteColumnRequest(col.id)}
                                     onUpdateColor={(color) => handleUpdateColumnColor(col.id, color)}
                                     onDeleteCard={handleDeleteCardRequest}
-                                    canVote={canVote}
+                                    canVote={!isPresentationMode && canVote} // Disable voting in presentation
                                     onVote={handleVote}
                                     currentUserId={currentUser?.id}
-                                    isAdmin={currentUser?.role === 'admin'}
+                                    isAdmin={currentUser?.role === 'admin' && !isPresentationMode} // Hide admin controls in presentation
                                 />
                             ))}
                         </SortableContext>

@@ -25,6 +25,12 @@ create table if not exists boards (
   are_votes_hidden boolean default false,
   max_votes integer,
   column_colors text[], -- Stored as array of strings
+  is_gifs_enabled boolean default true,
+  is_reactions_enabled boolean default true,
+  is_comments_enabled boolean default true,
+  are_cards_hidden boolean default false,
+  is_voting_disabled boolean default false,
+  password_hash text,
   created_at timestamp with time zone default now(),
   allowed_user_ids text[] -- Array of user IDs
 );

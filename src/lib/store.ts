@@ -37,6 +37,9 @@ interface AppState {
 
     currentUser: any | null;
     setCurrentUser: (user: any | null) => void;
+
+    isPresentationMode: boolean;
+    setIsPresentationMode: (mode: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -81,6 +84,9 @@ export const useAppStore = create<AppState>((set) => ({
 
     currentUser: null,
     setCurrentUser: (user) => set({ currentUser: user }),
+
+    isPresentationMode: false,
+    setIsPresentationMode: (mode) => set({ isPresentationMode: mode }),
 }));
 
 // Initialize language logic moved to components to avoid hydration mismatch

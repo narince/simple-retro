@@ -48,10 +48,18 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
         setTitleInput(boardTitle);
     }, [boardTitle]);
 
-    // Sort members: Current User first, then others
+    // Sort members: Current User first, then Active Filter User, then others
     const sortedMembers = members ? [...members].sort((a, b) => {
+        // 1. Current User always top
         if (currentUser && a.id === currentUser.id) return -1;
         if (currentUser && b.id === currentUser.id) return 1;
+
+        // 2. Active Filter User second (so they become visible if selected from dropdown)
+        if (activeUserFilter) {
+            if (a.id === activeUserFilter) return -1;
+            if (b.id === activeUserFilter) return 1;
+        }
+
         return 0;
     }) : [];
 
