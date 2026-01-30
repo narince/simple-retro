@@ -11,7 +11,6 @@ import {
     Rocket,
     Lightbulb,
     Star,
-    Diamond,
     Hand,
     Sparkles,
     ChevronDown
@@ -107,20 +106,19 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
         const user = await dataService.getCurrentUser();
         if (user && boardId) {
             const reactionId = crypto.randomUUID();
-            // Dispatch local event first with ID + TYPE (Mapped)
-            // Wait, previous code sent { emoji, id }.
-            // Does the listener expect 'emoji' or 'type'?
-            // If the listener expects 'type', I should send 'type'.
-            // If the listener expects 'emoji', does IT do the mapping?
-            // Let's check BoardPage or wherever the listener is. Assuming it uses this event to trigger visual.
-            // If I change detail to Include Type, it's safer.
-            // Or I can change 'emoji' to 'type' if the listener handles strings.
 
-            // Actually, best bet: send BOTH.
-            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji, type, id: reactionId } }));
+            let payload = emoji;
+            // Provide sender name for GIFs
+            if (emoji.startsWith('GIF|')) {
+                const name = user.full_name || user.email?.split('@')[0] || 'Anonymous';
+                payload = `${emoji}|${name}`;
+            }
+
+            // Dispatch local event
+            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji: payload, type, id: reactionId } }));
 
             // Broadcast
-            await dataService.broadcastReaction(boardId, emoji, user.id, reactionId);
+            await dataService.broadcastReaction(boardId, payload, user.id, reactionId);
         }
     };
 
@@ -408,31 +406,44 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                                     <span>{t('board.reactions')}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
-                                    <DropdownMenuSubContent className="dark:bg-zinc-950 dark:border-slate-800 p-2 min-w-0 w-auto">
-                                        <div className="grid grid-cols-5 gap-2">
+                                    <DropdownMenuSubContent className="dark:bg-zinc-950 dark:border-slate-800 p-2 min-w-[200px]">
+                                        <div className="grid grid-cols-5 gap-2 mb-2">
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('🔥')} className="h-8 w-8 text-lg">🔥</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('❤️')} className="h-8 w-8 text-lg">❤️</Button>
-                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🎉')} className="h-8 w-8 text-lg">🎉</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('👍')} className="h-8 w-8 text-lg">👍</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('👏')} className="h-8 w-8 text-lg">👏</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('🚀')} className="h-8 w-8 text-lg">🚀</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('💡')} className="h-8 w-8 text-lg">💡</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('⭐')} className="h-8 w-8 text-lg">⭐</Button>
-                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('💎')} className="h-8 w-8 text-lg">💎</Button>
+                                        </div>
+
+                                        <DropdownMenuSeparator />
+
+                                        <div className="p-1">
+                                            <p className="text-xs text-muted-foreground mb-2 px-1">{t('board.gifs') || "GIFs"}</p>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {['https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODFjZjI2YjExYjRkYjJkYjJkYjJkYjJkYjJkYjJkYjJkYiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o7TKSjRrfIPjeiVyM/giphy.gif',
+                                                    'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODFjZjI2YjExYjRkYjJkYjJkYjJkYjJkYjJkYjJkYjJkYiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/l0HlHFRbmaXWpnsdi/giphy.gif',
+                                                    'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODFjZjI2YjExYjRkYjJkYjJkYjJkYjJkYjJkYjJkYjJkYiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o6UB3VhArvomJHtdK/giphy.gif',
+                                                    'https://media.giphy.com/media/26tOZ42Mg6pbTUPvy/giphy.gif',
+                                                    'https://media.giphy.com/media/l41lI4bYmcsPJX9Go/giphy.gif',
+                                                    'https://media.giphy.com/media/xT5LMHxhOfscxPfIfm/giphy.gif'].map((gif, i) => (
+                                                        <button
+                                                            key={i}
+                                                            className="w-full aspect-video rounded-md overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all bg-black/10 relative group"
+                                                            onClick={() => triggerReaction(`GIF|${gif}`)}
+                                                        >
+                                                            <img src={gif} className="w-full h-full object-cover group-hover:scale-110 transition-transform" loading="lazy" />
+                                                        </button>
+                                                    ))}
+                                            </div>
                                         </div>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
 
-                            <DropdownMenuSeparator />
-
-                            {/* Blur */}
-                            <DropdownMenuItem onClick={() => setIsContentBlur(!isContentBlur)} className="gap-2 cursor-pointer">
-                                {isContentBlur ? <EyeOff className="h-4 w-4 text-blue-500" /> : <Eye className="h-4 w-4" />}
-                                <span>{isContentBlur ? t('board.reveal_content') : t('board.blur_content')}</span>
-                            </DropdownMenuItem>
-
                             {/* Settings */}
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => setIsSettingsOpen(true)} className="gap-2 cursor-pointer">
                                 <Settings className="h-4 w-4" />
                                 <span>{t('board.settings')}</span>
@@ -449,7 +460,6 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
 
                 <BoardSettingsSidebar isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} boardId={boardId} />
                 <TimerWidget open={isTimerOpen} onOpenChange={setIsTimerOpen} />
-            </div>
-        </div>
-    );
+            </div >
+            );
 }

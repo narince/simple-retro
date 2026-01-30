@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti';
 
-export type ReactionType = 'fire' | 'celebrate' | 'love' | 'thumbsup' | 'cry' | 'applause' | 'rocket' | 'bulb' | 'star' | 'gem';
+export type ReactionType = 'fire' | 'celebrate' | 'love' | 'thumbsup' | 'cry' | 'applause' | 'rocket' | 'bulb' | 'star';
 
 export const triggerVisualReaction = (type: ReactionType) => {
     // Helper for DOM animations centered on screen
@@ -101,36 +101,44 @@ export const triggerVisualReaction = (type: ReactionType) => {
         const leftHand = createCenteredElement('🫲', '120px');
         const rightHand = createCenteredElement('🫱', '120px');
 
-        // Initial positioning override
-        leftHand.style.left = '40%';
-        rightHand.style.left = '60%';
+        // Initial positioning
+        leftHand.style.left = '35%';
+        rightHand.style.left = '65%';
 
-        const duration = 2500;
+        const duration = 2000;
 
-        // Animate Left Hand
+        // Keyframes: Hands start apart, move to center (overlap), move apart, repeat.
+        // Center is 50%. 
+        // Left hand hits 45% (overlap). Right hand hits 55% (overlap). Or both 50%.
+
+        // Animate Left Hand (Approaches from Left)
         const animL = leftHand.animate([
-            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 }, // Appear
-            { transform: 'translate(-20%, -50%) rotate(-15deg) scale(1.1)', offset: 0.2 }, // Initial Prep
-            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.3 }, // CLAP
-            { transform: 'translate(-10%, -50%) rotate(-15deg) scale(1.1)', offset: 0.45 }, // Open
-            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.6 }, // CLAP
-            { transform: 'translate(-10%, -50%) rotate(-15deg) scale(1.1)', offset: 0.75 }, // Open
-            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.9 }, // CLAP
-            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 1 }
+            { transform: 'translate(-50%, -50%) scale(0) rotate(-20deg)', opacity: 0, left: '35%', offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(-10deg)', opacity: 1, left: '35%', offset: 0.1 },
+            // Clap 1
+            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.3 }, // Hit center-ish
+            { transform: 'translate(-20%, -50%) rotate(-10deg) scale(1)', left: '35%', offset: 0.4 }, // Back
+            // Clap 2
+            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.6 },
+            { transform: 'translate(-20%, -50%) rotate(-10deg) scale(1)', left: '35%', offset: 0.7 },
+            // Clap 3
+            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.9 },
+            { transform: 'translate(-50%, -50%) scale(0) rotate(-20deg)', opacity: 0, offset: 1 }
         ], { duration, fill: 'forwards' });
 
-        // Animate Right Hand
+        // Animate Right Hand (Approaches from Right)
         const animR = rightHand.animate([
-            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 },
-            { transform: 'translate(20%, -50%) rotate(15deg) scale(1.1)', offset: 0.2 },
-            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.3 },
-            { transform: 'translate(10%, -50%) rotate(15deg) scale(1.1)', offset: 0.45 },
-            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.6 },
-            { transform: 'translate(10%, -50%) rotate(15deg) scale(1.1)', offset: 0.75 },
-            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.9 },
-            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 1 }
+            { transform: 'translate(-50%, -50%) scale(0) rotate(20deg)', opacity: 0, left: '65%', offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(10deg)', opacity: 1, left: '65%', offset: 0.1 },
+            // Clap 1
+            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.3 }, // Hit center-ish
+            { transform: 'translate(20%, -50%) rotate(10deg) scale(1)', left: '65%', offset: 0.4 }, // Back
+            // Clap 2
+            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.6 },
+            { transform: 'translate(20%, -50%) rotate(10deg) scale(1)', left: '65%', offset: 0.7 },
+            // Clap 3
+            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.9 },
+            { transform: 'translate(-50%, -50%) scale(0) rotate(20deg)', opacity: 0, offset: 1 }
         ], { duration, fill: 'forwards' });
 
         animL.onfinish = () => { leftHand.remove(); rightHand.remove(); };
@@ -219,35 +227,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
             star.remove();
         };
 
-    } else if (type === 'gem') {
-        // Center Diamond with Shine
-        const gem = createCenteredElement('💎', '140px');
-        gem.style.filter = 'drop-shadow(0 0 40px rgba(59, 130, 246, 0.8))';
 
-        const animation = gem.animate([
-            { transform: 'translate(-50%, -50%) scale(0) rotate(-45deg)', opacity: 0 },
-            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.1 },
-            { transform: 'translate(-50%, -50%) scale(1.1) rotate(5deg)', opacity: 1, offset: 0.3 }, // Shine 1
-            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.4 },
-            { transform: 'translate(-50%, -50%) scale(1.1) rotate(-5deg)', opacity: 1, offset: 0.5 }, // Shine 2
-            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.6 },
-            { transform: 'translate(-50%, -50%) scale(3) rotate(0deg)', opacity: 0, offset: 1 }
-        ], { duration: 2500, easing: 'ease-out', fill: 'forwards' });
-
-        // Sparkles (Confetti burst)
-        confetti({
-            particleCount: 50,
-            spread: 90,
-            origin: { x: 0.5, y: 0.5 },
-            colors: ['#60a5fa', '#3b82f6', '#ffffff'],
-            shapes: ['star'], // Stars fit gem theme
-            startVelocity: 30,
-            gravity: 0.5,
-            scalar: 0.7,
-            ticks: 50
-        });
-
-        animation.onfinish = () => gem.remove();
 
     } else {
         // Celebrate (Default)

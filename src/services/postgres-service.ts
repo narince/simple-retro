@@ -319,7 +319,14 @@ export class PostgresService implements IDataService {
     // --- Cards ---
     async getCards(columnId: string): Promise<Card[]> {
         try {
-            const res = await pool.query('SELECT * FROM cards WHERE column_id = $1 ORDER BY order_index ASC, created_at DESC', [columnId]);
+            // Join with users to get latest avatar and name
+            const res = await pool.query(`
+                SELECT c.*, u.avatar_url as dynamic_avatar, u.full_name as dynamic_name 
+                FROM cards c
+                LEFT JOIN users u ON c.author_id = u.id
+                WHERE c.column_id = $1 
+                ORDER BY c.order_index ASC, c.created_at DESC
+            `, [columnId]);
             return res.rows.map(this.mapCard);
         } catch (error) {
             console.error("Postgres getCards Error:", error);
@@ -370,10 +377,18 @@ export class PostgresService implements IDataService {
         await pool.query('UPDATE cards SET color = $1 WHERE id = $2', [color, cardId]);
     }
 
-    async addComment(cardId: string, text: string, authorId: string): Promise<void> {
+    async addComment(cardId: string, text: string, authorId: string, options?: { isAnonymous?: boolean, authorName?: string, authorAvatar?: string }): Promise<void> {
         // Store as JSON in cards table for simplicity (as per types)
         const id = crypto.randomUUID();
-        const newComment = { id, text, author_id: authorId, created_at: new Date().toISOString() };
+        const newComment = {
+            id,
+            text,
+            author_id: authorId,
+            created_at: new Date().toISOString(),
+            is_anonymous: options?.isAnonymous || false,
+            author_name: options?.authorName,
+            author_avatar: options?.authorAvatar
+        };
 
         // Use COALESCE to handle null comments array -> default to []
         await pool.query(
@@ -504,8 +519,9 @@ export class PostgresService implements IDataService {
             column_id: row.column_id,
             content: row.content,
             author_id: row.author_id,
-            author_full_name: row.author_full_name,
-            author_avatar_url: row.author_avatar_url,
+            // Prefer joined dynamic data, fallback to snapshot
+            author_full_name: row.dynamic_name || row.author_full_name,
+            author_avatar_url: row.dynamic_avatar || row.author_avatar_url,
             isAnonymous: row.is_anonymous, // DB uses snake_case
             votes: row.votes || 0,
             voted_user_ids: row.voted_user_ids || [],

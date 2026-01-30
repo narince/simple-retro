@@ -174,6 +174,8 @@ const translations = {
         'settings.feature.comments': 'Comments',
         'settings.feature.password': 'Password',
 
+        'settings.exit_presentation': 'Exit Presentation Mode',
+
         // Profile
         'profile.title': 'Profile Settings',
         'profile.back': 'Back to Dashboard',
@@ -619,6 +621,7 @@ const translations = {
         'reaction.gem': 'Elmas',
 
         'board.reactions': 'Reaksiyonlar',
+        'settings.exit_presentation': 'Sunum Modundan Çık',
     }
 };
 

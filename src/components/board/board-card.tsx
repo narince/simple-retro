@@ -194,29 +194,44 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
         }
     };
 
+    // User for comments
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [isCommentAnonymous, setIsCommentAnonymous] = useState(false);
+
+    useEffect(() => {
+        dataService.getCurrentUser().then(setCurrentUser);
+    }, []);
+
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
 
-        // Optimistic add (Mock ID needed, strict coherence requires service response)
+        const authorName = isCommentAnonymous ? 'Anonymous' : (currentUser?.full_name || currentUser?.email?.split('@')[0] || 'User');
+        const authorAvatar = isCommentAnonymous ? undefined : currentUser?.avatar_url;
+
+        // Optimistic add
         const optimisticComment = {
             id: Math.random().toString(), // Temp ID
             text: newComment,
             author_id: currentUserId,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            is_anonymous: isCommentAnonymous,
+            author_name: authorName,
+            author_avatar: authorAvatar
         };
 
         setCommentsList([...commentsList, optimisticComment]);
-        await dataService.addComment(id, newComment, currentUserId || 'anon');
+        await dataService.addComment(id, newComment, currentUserId || 'anon', {
+            isAnonymous: isCommentAnonymous,
+            authorName,
+            authorAvatar
+        });
         setNewComment("");
-        // Ideally we should re-fetch to get real ID, but for local demo this works
     };
 
     const handleDeleteComment = async (commentId: string) => {
-        setCommentsList(list => list.filter(c => (c.id || c) !== commentId)); // Handle obj vs string
+        setCommentsList(list => list.filter(c => (c.id || c) !== commentId));
         await dataService.deleteComment(id, commentId);
     };
-
-
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none select-none relative group mb-3">
@@ -284,7 +299,7 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                 ) : (
                     <p className={cn(
                         "text-sm font-medium mb-auto pr-4 break-words leading-snug whitespace-pre-wrap",
-                        isContentBlur && "blur-sm select-none opacity-50"
+                        isContentBlur && "blur-[2px] select-none opacity-60"
                     )}>
                         {content}
                     </p>
@@ -339,23 +354,33 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                             {commentsList.map((comment, index) => {
                                 const isObj = typeof comment === 'object';
                                 const text = isObj ? comment.text : comment;
-                                // Legacy strings have no author, so no delete. New ones do.
+                                const isAnon = isObj ? comment.is_anonymous : false; // Check anon flag
+                                const authorName = isObj && !isAnon ? comment.author_name : 'Anonymous';
+                                const authorAvatar = isObj && !isAnon ? comment.author_avatar : null;
                                 const commentAuthorId = isObj ? comment.author_id : null;
                                 const isCommentAuthor = currentUserId && commentAuthorId === currentUserId;
                                 const canDeleteComment = isAdmin || isCommentAuthor;
                                 const cId = isObj ? comment.id : index.toString();
 
                                 return (
-                                    <div key={index} className="bg-black/10 p-2 rounded-sm text-xs text-white break-words group/comment flex justify-between items-start gap-2">
-                                        <span>{text}</span>
-                                        {canDeleteComment && (
-                                            <button
-                                                onClick={() => handleDeleteComment(cId)}
-                                                className="opacity-0 group-hover/comment:opacity-100 text-white/50 hover:text-red-400 transition-opacity"
-                                            >
-                                                <Trash2 className="h-3 w-3" />
-                                            </button>
-                                        )}
+                                    <div key={cId} className="bg-black/10 p-2 rounded-sm text-xs text-white group/comment flex flex-col gap-1">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <div className="flex items-center gap-2">
+                                                {authorAvatar && (
+                                                    <img src={authorAvatar} className="w-4 h-4 rounded-full object-cover" alt="avatar" />
+                                                )}
+                                                <span className="font-bold opacity-75 text-[10px]">{authorName}</span>
+                                            </div>
+                                            {canDeleteComment && (
+                                                <button
+                                                    onClick={() => handleDeleteComment(cId)}
+                                                    className="opacity-0 group-hover/comment:opacity-100 text-white/50 hover:text-red-400 transition-opacity"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <span className="break-words">{text}</span>
                                     </div>
                                 );
                             })}
@@ -368,6 +393,17 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                 onChange={(e) => setNewComment(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                             />
+
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className={cn("h-7 w-7", isCommentAnonymous ? "text-blue-300" : "text-white/50 hover:text-white")}
+                                onClick={() => setIsCommentAnonymous(!isCommentAnonymous)}
+                                title="Post Anonymously"
+                            >
+                                <img src="https://img.icons8.com/ios/50/ffffff/spy.png" className={cn("h-4 w-4 filter", isCommentAnonymous ? "brightness-150 drop-shadow-glow" : "invert")} alt="anon" />
+                            </Button>
+
                             <Button
                                 size="icon"
                                 className="h-7 w-7 bg-white/10 hover:bg-white/20 text-white border-0"

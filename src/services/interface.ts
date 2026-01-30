@@ -26,7 +26,7 @@ export interface IDataService {
     updateCardPosition(cardId: string, newColumnId: string, newIndex: number): Promise<void>;
     voteCard(cardId: string, userId: string): Promise<void>;
     updateCardColor(cardId: string, color: string): Promise<void>;
-    addComment(cardId: string, text: string, authorId: string): Promise<void>;
+    addComment(cardId: string, text: string, authorId: string, options?: { isAnonymous?: boolean, authorName?: string, authorAvatar?: string }): Promise<void>;
     deleteComment(cardId: string, commentId: string): Promise<void>;
 
     // Columns

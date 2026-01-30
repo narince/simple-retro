@@ -33,6 +33,7 @@ interface Reaction {
 export function ReactionOverlay() {
     const [reactions, setReactions] = useState<Reaction[]>([]);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [activeGif, setActiveGif] = useState<{ id: string; url: string; sender: string } | null>(null);
     const processedIdsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
@@ -41,13 +42,29 @@ export function ReactionOverlay() {
 
     useEffect(() => {
         const addShower = (emoji: string) => {
+            // Check for GIF
+            if (emoji.startsWith('GIF|')) {
+                const parts = emoji.split('|');
+                // Format: GIF|url|sender
+                const url = parts[1];
+                const sender = parts[2] || 'Anonymous';
+                const gifId = Math.random().toString();
+
+                setActiveGif({ id: gifId, url, sender });
+
+                // Auto dismiss after 6 seconds
+                setTimeout(() => {
+                    setActiveGif(current => current?.id === gifId ? null : current);
+                }, 6000);
+                return;
+            }
+
             // Map Emoji to Special Reaction Type
             const SPECIAL_MAP: Record<string, ReactionType> = {
                 '👏': 'applause',
                 '🚀': 'rocket',
                 '💡': 'bulb',
-                '⭐': 'star',
-                '💎': 'gem'
+                '⭐': 'star'
             };
 
             const specialType = SPECIAL_MAP[emoji];
@@ -128,7 +145,7 @@ export function ReactionOverlay() {
             } catch (err) {
                 // silent fail
             }
-        }, 5000);
+        }, 3000); // 3s polling
 
         return () => {
             window.removeEventListener('retro-reaction', handleCustom);
@@ -139,6 +156,27 @@ export function ReactionOverlay() {
     return (
         <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
             <AnimatePresence>
+                {/* GIF Overlay - Twitch Method */}
+                {activeGif && (
+                    <motion.div
+                        key="gif-overlay"
+                        initial={{ opacity: 0, y: 100, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 50, scale: 0.8 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-black/60 p-4 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl max-w-sm pointer-events-auto"
+                    >
+                        <div className="rounded-lg overflow-hidden border-2 border-white/30 shadow-lg">
+                            <img src={activeGif.url} className="max-h-64 object-contain" alt="Reaction GIF" />
+                        </div>
+                        <div className="text-white font-bold text-shadow-sm flex items-center gap-2 bg-black/40 px-3 py-1 rounded-full">
+                            <span className="text-blue-400">{activeGif.sender}</span>
+                            <span>sent a GIF!</span>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Confetti */}
                 {reactions.map(r => {
                     // Standard Confetti Animation
                     const initial = { opacity: 1, y: `${r.yStart}vh`, x: 0, rotate: 0, scale: 0.8 };

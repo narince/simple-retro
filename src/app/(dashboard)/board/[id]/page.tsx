@@ -62,8 +62,7 @@ export default function BoardPage() {
     }, [router]);
 
     // Calculate User Votes
-    const maxVotes = useAppStore(s => s.maxVotesPerUser);
-    const isPresentationMode = useAppStore(s => s.isPresentationMode); // Add this
+    const { maxVotesPerUser: maxVotes, isPresentationMode, setIsPresentationMode } = useAppStore();
     const currentUserVotes = cards.reduce((acc, card) => {
         if (currentUser && card.voted_user_ids?.includes(currentUser.id)) {
             return acc + 1;
@@ -519,6 +518,19 @@ export default function BoardPage() {
                     ) : null}
                 </DragOverlay>
                 <ReactionOverlay />
+
+                {/* Exit Presentation Mode Button */}
+                {isPresentationMode && (
+                    <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4">
+                        <button
+                            onClick={() => setIsPresentationMode(false)}
+                            className="bg-slate-900/80 hover:bg-slate-800 text-white px-6 py-3 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-2 font-medium border border-white/20 transition-all hover:scale-105"
+                        >
+                            <span className="text-xl">✕</span>
+                            {t('settings.exit_presentation') || "Exit Presentation"}
+                        </button>
+                    </div>
+                )}
             </div>
         </DndContext >
     );
