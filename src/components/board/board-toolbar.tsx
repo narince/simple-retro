@@ -33,9 +33,10 @@ interface BoardToolbarProps {
     members?: any[]; // Ideally User type
     activeUserFilter?: string | null;
     onMemberClick?: (userId: string) => void;
+    currentUser?: any; // Ideally User type
 }
 
-export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTitle, onUpdateBoardTitle, onDeleteBoard, boardId, onInvite, members, activeUserFilter, onMemberClick }: BoardToolbarProps) {
+export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTitle, onUpdateBoardTitle, onDeleteBoard, boardId, onInvite, members, activeUserFilter, onMemberClick, currentUser }: BoardToolbarProps) {
     const { isContentBlur, setIsContentBlur } = useAppStore();
     const { t } = useTranslation();
     const [titleInput, setTitleInput] = useState(boardTitle);
@@ -46,6 +47,13 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
     useEffect(() => {
         setTitleInput(boardTitle);
     }, [boardTitle]);
+
+    // Sort members: Current User first, then others
+    const sortedMembers = members ? [...members].sort((a, b) => {
+        if (currentUser && a.id === currentUser.id) return -1;
+        if (currentUser && b.id === currentUser.id) return 1;
+        return 0;
+    }) : [];
 
     const handleTitleSubmit = () => {
         setIsEditingTitle(false);
@@ -177,19 +185,20 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
 
                     {/* Member Avatars */}
                     <div className="flex -space-x-2 pl-2 items-center py-1">
-                        {members?.slice(0, 5).map((user: any) => {
+                        {sortedMembers.slice(0, 5).map((user: any) => {
                             const isActive = activeUserFilter === user.id;
+                            const isMe = currentUser && user.id === currentUser.id;
                             return (
                                 <button
                                     key={user.id}
                                     onClick={() => onMemberClick?.(user.id)}
                                     className={cn(
-                                        "h-8 w-8 rounded-full border-2 flex items-center justify-center overflow-hidden shrink-0 transition-all focus:outline-none",
+                                        "h-8 w-8 rounded-full border-2 flex items-center justify-center overflow-hidden shrink-0 transition-all focus:outline-none relative group",
                                         isActive
-                                            ? "border-blue-500 ring-2 ring-blue-300 z-20 scale-110"
-                                            : "border-white dark:border-zinc-900 hover:scale-105 hover:z-10 bg-slate-200 dark:bg-zinc-800"
+                                            ? "border-blue-500 ring-2 ring-blue-300 z-30 scale-110"
+                                            : "border-white dark:border-zinc-900 hover:scale-105 hover:z-20 bg-slate-200 dark:bg-zinc-800"
                                     )}
-                                    title={`Filter by ${user.full_name || user.email}`}
+                                    title={isMe ? `${user.full_name} (Me)` : `Filter by ${user.full_name || user.email}`}
                                 >
                                     {user.avatar_url ? (
                                         <img src={user.avatar_url} alt={user.full_name} className="h-full w-full object-cover" />
@@ -198,13 +207,40 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                                             {user.full_name?.substring(0, 2).toUpperCase() || user.email.substring(0, 2).toUpperCase()}
                                         </span>
                                     )}
+                                    {isMe && (
+                                        <span className="absolute bottom-0 right-0 h-2 w-2 bg-green-500 rounded-full border border-white"></span>
+                                    )}
                                 </button>
                             );
                         })}
-                        {members && members.length > 5 && (
-                            <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] text-slate-500 dark:text-slate-400 font-medium shrink-0 z-10">
-                                +{members.length - 5}
-                            </div>
+                        {sortedMembers.length > 5 && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="h-8 w-8 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] text-slate-500 dark:text-slate-400 font-medium shrink-0 z-10 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">
+                                        +{sortedMembers.length - 5}
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="dark:bg-zinc-950 dark:border-slate-800">
+                                    <div className="max-h-48 overflow-y-auto p-1">
+                                        {sortedMembers.slice(5).map((user: any) => (
+                                            <DropdownMenuItem
+                                                key={user.id}
+                                                onClick={() => onMemberClick?.(user.id)}
+                                                className="flex items-center gap-2 cursor-pointer"
+                                            >
+                                                <div className="h-6 w-6 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden text-[10px] uppercase font-bold text-slate-500">
+                                                    {user.avatar_url ? (
+                                                        <img src={user.avatar_url} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        (user.full_name || user.email).substring(0, 2)
+                                                    )}
+                                                </div>
+                                                <span className="text-sm truncate max-w-[150px]">{user.full_name || user.email}</span>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </div>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         )}
                     </div>
                 </div>

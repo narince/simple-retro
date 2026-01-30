@@ -7,6 +7,7 @@ create table if not exists users (
   email text not null unique,
   full_name text,
   avatar_url text,
+  password_hash text,
   role text default 'user',
   last_login_at timestamp with time zone,
   created_at timestamp with time zone default now()

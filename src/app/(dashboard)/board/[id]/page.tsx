@@ -360,6 +360,7 @@ export default function BoardPage() {
                     members={memberDetails}
                     activeUserFilter={activeUserFilter}
                     onMemberClick={handleMemberClick}
+                    currentUser={currentUser}
                 />
 
                 <InviteDialog
