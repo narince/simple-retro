@@ -45,9 +45,20 @@ export default function BoardPage() {
     const [isInviteOpen, setIsInviteOpen] = useState(false);
 
     const [currentUser, setCurrentUser] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
-        dataService.getCurrentUser().then(u => setCurrentUser(u));
-    }, []);
+        const checkAuth = async () => {
+            const user = await dataService.getCurrentUser();
+            if (!user) {
+                router.push('/login');
+                return;
+            }
+            setCurrentUser(user);
+            setIsLoading(false);
+        };
+        checkAuth();
+    }, [router]);
 
     // Calculate User Votes
     const maxVotes = useAppStore(s => s.maxVotesPerUser);
