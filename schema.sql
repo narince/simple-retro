@@ -10,6 +10,7 @@ create table if not exists users (
   password_hash text,
   role text default 'user',
   last_login_at timestamp with time zone,
+  last_logout_at timestamp with time zone,
   created_at timestamp with time zone default now()
 );
 
