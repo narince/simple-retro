@@ -33,7 +33,6 @@ import {
 import { BoardSettingsSidebar } from "./board-settings-sidebar";
 import { TimerWidget } from "./timer-widget";
 import { dataService } from "@/services";
-import { VozolIcon } from "@/components/icons/vozol-icon";
 
 interface BoardToolbarProps {
     onAddCard: () => void;
@@ -97,7 +96,6 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
             case '💡': type = 'bulb'; break;
             case '⭐': type = 'star'; break;
             case '💎': type = 'gem'; break;
-            case '🚬': type = 'vozol'; break;
         }
 
         // Trigger local visual effect immediately
@@ -212,7 +210,6 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('💡')} className="text-xl">💡</Button>
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('⭐')} className="text-xl">⭐</Button>
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('💎')} className="text-xl">💎</Button>
-                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🚬')} className="text-xl flex items-center justify-center"><VozolIcon /></Button>
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -422,7 +419,6 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('💡')} className="h-8 w-8 text-lg">💡</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('⭐')} className="h-8 w-8 text-lg">⭐</Button>
                                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('💎')} className="h-8 w-8 text-lg">💎</Button>
-                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🚬')} className="h-8 w-8 text-lg flex items-center justify-center"><VozolIcon /></Button>
                                         </div>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
