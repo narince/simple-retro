@@ -244,11 +244,11 @@ export default function ProfilePage() {
                                     <DropdownMenuContent align="center">
                                         <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer gap-2">
                                             <Upload className="h-4 w-4" />
-                                            <span>Upload from Computer</span>
+                                            <span>{t('profile.upload_from_computer')}</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setShowUrlInput(true)} className="cursor-pointer gap-2">
                                             <LinkIcon className="h-4 w-4" />
-                                            <span>Enter URL</span>
+                                            <span>{t('profile.enter_url')}</span>
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

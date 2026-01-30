@@ -272,6 +272,8 @@ const translations = {
         'profile.enter_photo_url_placeholder': 'https://example.com/photo.jpg',
         'profile.load_url': 'Load',
         'profile.invalid_url': 'Invalid URL',
+        'profile.upload_from_computer': 'Upload from Computer',
+        'profile.enter_url': 'Enter URL',
 
         // Static Pages
         'privacy.title': 'Privacy Policy',
@@ -589,6 +591,8 @@ const translations = {
         'profile.enter_photo_url_placeholder': 'https://example.com/photo.jpg',
         'profile.load_url': 'Yükle',
         'profile.invalid_url': 'Geçersiz URL',
+        'profile.upload_from_computer': 'Bilgisayardan Yükle',
+        'profile.enter_url': 'URL Girin',
     }
 };
 
