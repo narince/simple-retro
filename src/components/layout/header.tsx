@@ -16,7 +16,7 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { ModeToggle } from "@/components/mode-toggle";
-import { Star, Shield } from 'lucide-react';
+import { Star, Shield, Menu } from 'lucide-react';
 import { dataService } from '@/services';
 import { User } from '@/services/types';
 import { useRouter } from 'next/navigation';
@@ -142,18 +142,18 @@ export function Header() {
                                     {/* Mobile: Theme & Language */}
                                     <div className="md:hidden">
                                         <DropdownMenuSub>
-                                            <DropdownMenuSubTrigger>Theme</DropdownMenuSubTrigger>
+                                            <DropdownMenuSubTrigger>{t('header.theme')}</DropdownMenuSubTrigger>
                                             <DropdownMenuPortal>
                                                 <DropdownMenuSubContent>
-                                                    <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('light')}>{t('theme.light')}</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('dark')}>{t('theme.dark')}</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('system')}>{t('theme.system')}</DropdownMenuItem>
                                                 </DropdownMenuSubContent>
                                             </DropdownMenuPortal>
                                         </DropdownMenuSub>
 
                                         <DropdownMenuSub>
-                                            <DropdownMenuSubTrigger>Language</DropdownMenuSubTrigger>
+                                            <DropdownMenuSubTrigger>{t('header.language')}</DropdownMenuSubTrigger>
                                             <DropdownMenuPortal>
                                                 <DropdownMenuSubContent>
                                                     <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('tr')}>Türkçe</DropdownMenuItem>
@@ -172,12 +172,51 @@ export function Header() {
                         </>
                     ) : (
                         <div className="flex items-center gap-2">
-                            <div className="md:hidden">
+                            {/* Desktop: Separate Buttons */}
+                            <div className="hidden md:flex items-center gap-2">
                                 <ModeToggle />
+                                <Link href="/login">
+                                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-full px-6">{t('header.login')}</Button>
+                                </Link>
                             </div>
-                            <Link href="/login">
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-full px-6">{t('header.login')}</Button>
-                            </Link>
+
+                            {/* Mobile: Hamburger Menu */}
+                            <div className="md:hidden">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <Menu className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => router.push('/login')}>
+                                            <span className="font-bold text-blue-600">{t('header.login')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>{t('header.theme')}</DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent>
+                                                    <DropdownMenuItem onClick={() => setTheme('light')}>{t('theme.light')}</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('dark')}>{t('theme.dark')}</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('system')}>{t('theme.system')}</DropdownMenuItem>
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
+
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>{t('header.language')}</DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent>
+                                                    <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('tr')}>Türkçe</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('en')}>English</DropdownMenuItem>
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                         </div>
                     )}
                 </div>

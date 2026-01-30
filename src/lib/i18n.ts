@@ -176,6 +176,8 @@ const translations = {
 
         'settings.exit_presentation': 'Exit Presentation Mode',
         'board.gifs': 'GIFs',
+        'header.theme': 'Theme',
+        'header.language': 'Language',
 
         // Profile
         'profile.title': 'Profile Settings',
@@ -624,6 +626,8 @@ const translations = {
         'board.reactions': 'Reaksiyonlar',
         'settings.exit_presentation': 'Sunum Modundan Çık',
         'board.gifs': 'GIFler',
+        'header.theme': 'Tema',
+        'header.language': 'Dil',
     }
 };
 
