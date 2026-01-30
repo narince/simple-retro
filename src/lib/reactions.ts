@@ -3,9 +3,20 @@ import confetti from 'canvas-confetti';
 export type ReactionType = 'fire' | 'celebrate' | 'love' | 'thumbsup' | 'cry' | 'applause' | 'rocket' | 'bulb' | 'star' | 'gem';
 
 export const triggerVisualReaction = (type: ReactionType) => {
-    const duration = 2000;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 50 };
-    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+    // Helper for DOM animations centered on screen
+    const createCenteredElement = (emoji: string, size = '100px', zIndex = '9999') => {
+        const el = document.createElement('div');
+        el.textContent = emoji;
+        el.style.position = 'fixed';
+        el.style.left = '50%';
+        el.style.top = '50%';
+        el.style.transform = 'translate(-50%, -50%) scale(0)';
+        el.style.fontSize = size;
+        el.style.zIndex = zIndex;
+        el.style.pointerEvents = 'none';
+        document.body.appendChild(el);
+        return el;
+    };
 
     if (type === 'fire') {
         const animationEnd = Date.now() + 1000;
@@ -13,14 +24,13 @@ export const triggerVisualReaction = (type: ReactionType) => {
             const timeLeft = animationEnd - Date.now();
             if (timeLeft <= 0) return clearInterval(interval);
 
-            // Intense fire from bottom center
             confetti({
                 particleCount: 8,
                 spread: 30, // Narrow spread like a flame
                 origin: { x: 0.5, y: 1 },
                 startVelocity: 40,
                 colors: ['#ef4444', '#f97316', '#fbbf24'], // Red, Orange, Amber
-                shapes: ['circle', 'square'], // Embers
+                shapes: ['circle'], // Embers (Removed square to look like fire)
                 scalar: 1,
                 drift: 0,
                 ticks: 60,
@@ -30,7 +40,6 @@ export const triggerVisualReaction = (type: ReactionType) => {
         }, 50);
 
     } else if (type === 'love') {
-        // ... (keep same)
         const duration = 1500;
         const end = Date.now() + duration;
 
@@ -42,7 +51,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
                 spread: 55,
                 origin: { x: 0, y: 1 },
                 colors: ['#ec4899', '#f43f5e'],
-                shapes: ['circle'],
+                shapes: ['circle'], // Hearts simulated by circles for performance, or could use shape:'heart' if supported custom
                 scalar: 2
             });
             confetti({
@@ -88,111 +97,128 @@ export const triggerVisualReaction = (type: ReactionType) => {
             }
         }());
     } else if (type === 'applause') {
-        // Gold and Silver confetti from bottom corners
-        const end = Date.now() + 1500;
-        (function frame() {
-            confetti({
-                particleCount: 5,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: ['#fbbf24', '#fcd34d', '#e5e7eb'], // Gold, Silver
-            });
-            confetti({
-                particleCount: 5,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: ['#fbbf24', '#fcd34d', '#e5e7eb'],
-            });
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-    } else if (type === 'rocket') {
-        const rocket = document.createElement('div');
-        rocket.textContent = '🚀';
-        rocket.style.position = 'fixed';
-        rocket.style.left = '50%';
-        rocket.style.top = '50%';
-        rocket.style.transform = 'translate(-50%, -50%) scale(0.5)';
-        rocket.style.fontSize = '80px';
-        rocket.style.opacity = '0';
-        rocket.style.transition = 'all 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        rocket.style.zIndex = '9999';
-        rocket.style.pointerEvents = 'none';
-        rocket.style.filter = 'drop-shadow(0 0 20px rgba(255,100,0,0.5))'; // Glow
-        document.body.appendChild(rocket);
+        // Real Clapping: Center Hands
+        const leftHand = createCenteredElement('🫲', '120px');
+        const rightHand = createCenteredElement('🫱', '120px');
 
-        // Use Web Animation API for reliable performance
+        // Initial positioning override
+        leftHand.style.left = '40%';
+        rightHand.style.left = '60%';
+
+        const duration = 2500;
+
+        // Animate Left Hand
+        const animL = leftHand.animate([
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 }, // Appear
+            { transform: 'translate(-20%, -50%) rotate(-15deg) scale(1.1)', offset: 0.2 }, // Initial Prep
+            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.3 }, // CLAP
+            { transform: 'translate(-10%, -50%) rotate(-15deg) scale(1.1)', offset: 0.45 }, // Open
+            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.6 }, // CLAP
+            { transform: 'translate(-10%, -50%) rotate(-15deg) scale(1.1)', offset: 0.75 }, // Open
+            { transform: 'translate(10%, -50%) rotate(0deg) scale(1)', offset: 0.9 }, // CLAP
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 1 }
+        ], { duration, fill: 'forwards' });
+
+        // Animate Right Hand
+        const animR = rightHand.animate([
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 },
+            { transform: 'translate(20%, -50%) rotate(15deg) scale(1.1)', offset: 0.2 },
+            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.3 },
+            { transform: 'translate(10%, -50%) rotate(15deg) scale(1.1)', offset: 0.45 },
+            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.6 },
+            { transform: 'translate(10%, -50%) rotate(15deg) scale(1.1)', offset: 0.75 },
+            { transform: 'translate(-10%, -50%) rotate(0deg) scale(1)', offset: 0.9 },
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 1 }
+        ], { duration, fill: 'forwards' });
+
+        animL.onfinish = () => { leftHand.remove(); rightHand.remove(); };
+
+    } else if (type === 'rocket') {
+        const rocket = createCenteredElement('🚀', '100px');
+        rocket.style.filter = 'drop-shadow(0 0 20px rgba(255,100,0,0.5))';
+
         const animation = rocket.animate([
             { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 0 },
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 }, // Appear quickly
-            { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1, offset: 0.4 }, // Hover/Prepare
-            { transform: 'translate(-50%, -50%) scale(8)', opacity: 0, offset: 1 } // Zoom out into face
-        ], {
-            duration: 2500,
-            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            fill: 'forwards'
-        });
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 },
+            { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1, offset: 0.3 }, // Hover
+            { transform: 'translate(-50%, -50%) scale(8)', opacity: 0, offset: 1 } // Zoom out to face
+        ], { duration: 3500, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'forwards' });
 
-        // Fire effect - MORE INTENSE ("Bolca")
-        const fireDuration = 2000;
+        // Fire Trail - PURE Circles, No debris falling from top
+        const fireDuration = 3000;
         const fireEnd = Date.now() + fireDuration;
 
         const fireInterval = setInterval(() => {
             const timeLeft = fireEnd - Date.now();
             if (timeLeft <= 0) return clearInterval(fireInterval);
 
-            // Fire particles generated from the center (behind the rocket)
             confetti({
-                particleCount: 25, // Increased from 15
-                startVelocity: 35, // Faster
-                spread: 60, // Wider exhaust
+                particleCount: 50,
+                startVelocity: 45,
+                spread: 70,
                 origin: { x: 0.5, y: 0.55 },
-                colors: ['#ef4444', '#f97316', '#fbbf24', '#ffffff', '#ffff00'], // Added bright yellow
-                shapes: ['circle', 'square'],
+                colors: ['#ef4444', '#f97316', '#fbbf24', '#ffffff'],
+                shapes: ['circle'], // STRICTLY CIRCLES
                 scalar: 1,
-                gravity: 1, // Fall faster
+                gravity: 1,
                 drift: 0,
-                ticks: 50,
+                ticks: 60,
                 zIndex: 9998
             });
-        }, 30); // Faster frequency (30ms)
+        }, 30);
+
+        animation.onfinish = () => rocket.remove();
+
+    } else if (type === 'bulb') {
+        // Bulb: Center, Zoom In, Blink
+        const bulb = createCenteredElement('💡', '120px');
+        bulb.style.filter = 'drop-shadow(0 0 30px rgba(253, 224, 71, 0.8))'; // Glow
+
+        const animation = bulb.animate([
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.2 }, // Arrive
+            { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 0.5, offset: 0.3 }, // Blink dim
+            { transform: 'translate(-50%, -50%) scale(1.3)', opacity: 1, offset: 0.4 }, // Blink bright
+            { transform: 'translate(-50%, -50%) scale(1.4)', opacity: 0.5, offset: 0.5 }, // Blink dim
+            { transform: 'translate(-50%, -50%) scale(3)', opacity: 0, offset: 1 } // Zoom out
+        ], { duration: 2500, easing: 'ease-out', fill: 'forwards' });
+
+        animation.onfinish = () => bulb.remove();
+
+    } else if (type === 'star') {
+        // Star: Dark Background + Center Star Zoom + Blink
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        overlay.style.zIndex = '9998';
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.5s';
+        document.body.appendChild(overlay);
+
+        // Trigger fade in
+        requestAnimationFrame(() => overlay.style.opacity = '1');
+
+        const star = createCenteredElement('⭐', '150px', '9999');
+        star.style.filter = 'drop-shadow(0 0 40px rgba(255, 215, 0, 0.9))';
+
+        const animation = star.animate([
+            { transform: 'translate(-50%, -50%) scale(0)', opacity: 0, offset: 0 },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0.2 },
+            { transform: 'translate(-50%, -50%) scale(1.2) rotate(45deg)', opacity: 0.8, offset: 0.4 },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(90deg)', opacity: 1, offset: 0.6 },
+            { transform: 'translate(-50%, -50%) scale(1.5) rotate(180deg)', opacity: 0.8, offset: 0.8 },
+            { transform: 'translate(-50%, -50%) scale(4) rotate(360deg)', opacity: 0, offset: 1 }
+        ], { duration: 3000, easing: 'ease-out', fill: 'forwards' });
 
         animation.onfinish = () => {
-            if (rocket.parentNode) rocket.parentNode.removeChild(rocket);
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 500);
+            star.remove();
         };
-    } else if (type === 'bulb') {
-        // Idea / Light: Center burst of yellow/white
-        confetti({
-            particleCount: 100,
-            spread: 360,
-            origin: { x: 0.5, y: 0.4 },
-            colors: ['#fef08a', '#ffffff', '#eab308'], // Yellows
-            startVelocity: 20,
-            gravity: 0,
-            ticks: 50,
-            scalar: 1.2
-        });
-    } else if (type === 'star') {
-        // Stars everywhere
-        const end = Date.now() + 1000;
-        (function frame() {
-            confetti({
-                particleCount: 5,
-                angle: 90,
-                spread: 360,
-                origin: { x: Math.random(), y: Math.random() - 0.2 },
-                colors: ['#fbbf24', '#f59e0b'],
-                shapes: ['star'],
-                scalar: 1.5,
-                startVelocity: 15
-            });
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
+
     } else if (type === 'gem') {
         // Premium feel: Blue/Purple/Cyan
         confetti({
@@ -200,10 +226,11 @@ export const triggerVisualReaction = (type: ReactionType) => {
             spread: 160,
             origin: { y: 0.6 },
             colors: ['#8b5cf6', '#3b82f6', '#06b6d4'],
-            shapes: ['square'], // "Gems"
+            shapes: ['square'],
             scalar: 1.2,
             flat: true
         });
+
     } else {
         // Celebrate (Default)
         confetti({
