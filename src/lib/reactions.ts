@@ -124,14 +124,20 @@ export const triggerVisualReaction = (type: ReactionType) => {
         rocket.style.filter = 'drop-shadow(0 0 20px rgba(255,100,0,0.5))'; // Glow
         document.body.appendChild(rocket);
 
-        // Trigger animation next frame
-        requestAnimationFrame(() => {
-            rocket.style.transform = 'translate(-50%, -50%) scale(8)'; // Fly towards screen
-            rocket.style.opacity = '1';
+        // Use Web Animation API for reliable performance
+        const animation = rocket.animate([
+            { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 0 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1, offset: 0.1 }, // Appear quickly
+            { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1, offset: 0.4 }, // Hover/Prepare
+            { transform: 'translate(-50%, -50%) scale(8)', opacity: 0, offset: 1 } // Zoom out into face
+        ], {
+            duration: 2500,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fill: 'forwards'
         });
 
-        // Fire effect acting as propulsion
-        const fireDuration = 1500;
+        // Fire effect - MORE INTENSE ("Bolca")
+        const fireDuration = 2000;
         const fireEnd = Date.now() + fireDuration;
 
         const fireInterval = setInterval(() => {
@@ -140,27 +146,23 @@ export const triggerVisualReaction = (type: ReactionType) => {
 
             // Fire particles generated from the center (behind the rocket)
             confetti({
-                particleCount: 15,
-                startVelocity: 20,
-                spread: 30, // Narrow exhaust
-                origin: { x: 0.5, y: 0.55 }, // Slightly below center
-                colors: ['#ef4444', '#f97316', '#fbbf24', '#ffffff'], // Red, Orange, Amber, White heat
-                shapes: ['circle'],
-                scalar: 0.8,
-                gravity: 0.8, // Fall down away from rocket
+                particleCount: 25, // Increased from 15
+                startVelocity: 35, // Faster
+                spread: 60, // Wider exhaust
+                origin: { x: 0.5, y: 0.55 },
+                colors: ['#ef4444', '#f97316', '#fbbf24', '#ffffff', '#ffff00'], // Added bright yellow
+                shapes: ['circle', 'square'],
+                scalar: 1,
+                gravity: 1, // Fall faster
                 drift: 0,
-                ticks: 40,
-                zIndex: 9998 // Behind rocket
+                ticks: 50,
+                zIndex: 9998
             });
-        }, 50);
+        }, 30); // Faster frequency (30ms)
 
-        // Cleanup
-        setTimeout(() => {
-            rocket.style.opacity = '0';
-            setTimeout(() => {
-                if (rocket.parentNode) rocket.parentNode.removeChild(rocket);
-            }, 500);
-        }, 2000);
+        animation.onfinish = () => {
+            if (rocket.parentNode) rocket.parentNode.removeChild(rocket);
+        };
     } else if (type === 'bulb') {
         // Idea / Light: Center burst of yellow/white
         confetti({
