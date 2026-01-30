@@ -4,12 +4,23 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuPortal,
+    DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { ModeToggle } from "@/components/mode-toggle";
 import { Star, Shield } from 'lucide-react';
 import { dataService } from '@/services';
 import { User } from '@/services/types';
 import { useRouter } from 'next/navigation';
+import { useTheme } from "next-themes";
 
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { useTranslation } from '@/lib/i18n';
@@ -23,6 +34,7 @@ export function Header() {
     const user = useAppStore(state => state.currentUser);
     const setCurrentUser = useAppStore(state => state.setCurrentUser);
     const { t } = useTranslation();
+    const { setTheme } = useTheme();
 
     const [mounted, setMounted] = useState(false);
 
@@ -93,8 +105,10 @@ export function Header() {
 
                 {/* Right: User Info */}
                 <div className="flex items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <ModeToggle />
-                    <LanguageSwitcher />
+                    <div className="hidden md:flex items-center gap-2">
+                        <ModeToggle />
+                        <LanguageSwitcher />
+                    </div>
 
                     {user ? (
                         <>
@@ -121,6 +135,35 @@ export function Header() {
                                     )}
                                     <DropdownMenuItem onClick={() => router.push('/profile')}>{t('header.profile')}</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => router.push('/settings')}>{t('header.settings')}</DropdownMenuItem>
+
+                                    <DropdownMenuSeparator className="md:hidden" />
+
+
+                                    {/* Mobile: Theme & Language */}
+                                    <div className="md:hidden">
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>Theme</DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent>
+                                                    <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
+
+                                        <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger>Language</DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent>
+                                                    <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('tr')}>Türkçe</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('en')}>English</DropdownMenuItem>
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
+                                    </div>
+
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 dark:text-red-400">
                                         {t('header.logout')}
                                     </DropdownMenuItem>
@@ -128,9 +171,14 @@ export function Header() {
                             </DropdownMenu>
                         </>
                     ) : (
-                        <Link href="/login">
-                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-full px-6">{t('header.login')}</Button>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            <div className="md:hidden">
+                                <ModeToggle />
+                            </div>
+                            <Link href="/login">
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-full px-6">{t('header.login')}</Button>
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>

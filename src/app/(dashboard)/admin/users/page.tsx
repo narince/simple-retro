@@ -201,8 +201,10 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden overflow-x-auto">
+            {/* Desktop Table */}
+            <div className="hidden md:block bg-white dark:bg-zinc-950 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden overflow-x-auto">
                 <Table>
+                    {/* ... existing table content ... */}
                     <TableHeader>
                         <TableRow className="dark:border-slate-800 dark:hover:bg-zinc-900/50">
                             <TableHead className="dark:text-slate-400">{t('admin.table.user')}</TableHead>
@@ -289,6 +291,69 @@ export default function AdminUsersPage() {
                         ))}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+                {users.map((user) => (
+                    <div key={user.id} className="bg-white dark:bg-zinc-950 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10 border dark:border-slate-700">
+                                    <AvatarImage src={user.avatar_url} />
+                                    <AvatarFallback className="dark:bg-slate-800 dark:text-slate-200">{getInitials(user.full_name)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <div className="font-semibold text-slate-900 dark:text-slate-100">{user.full_name}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">{user.email}</div>
+                                </div>
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0 dark:text-slate-400 dark:hover:bg-zinc-800 dark:hover:text-slate-200">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="dark:bg-zinc-950 dark:border-slate-800">
+                                    <DropdownMenuItem onClick={() => handleEditUser(user)} className="cursor-pointer dark:focus:bg-zinc-900">
+                                        <Edit className="mr-2 h-4 w-4" /> {t('admin.action.edit')}
+                                    </DropdownMenuItem>
+                                    {user.id !== currentUser?.id && (
+                                        <DropdownMenuItem onClick={() => handleImpersonate(user)} className="cursor-pointer dark:focus:bg-zinc-900">
+                                            <LogIn className="mr-2 h-4 w-4 text-green-600" /> {t('admin.action.impersonate')}
+                                        </DropdownMenuItem>
+                                    )}
+                                    {user.id !== currentUser?.id && (
+                                        user.role === 'admin' ? (
+                                            <DropdownMenuItem onClick={() => handleRoleChange(user, 'user')} className="cursor-pointer dark:focus:bg-zinc-900">
+                                                <ShieldAlert className="mr-2 h-4 w-4 text-orange-600" /> {t('admin.action.make_user')}
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem onClick={() => handleRoleChange(user, 'admin')} className="cursor-pointer dark:focus:bg-zinc-900">
+                                                <Shield className="mr-2 h-4 w-4 text-blue-600" /> {t('admin.action.make_admin')}
+                                            </DropdownMenuItem>
+                                        )
+                                    )}
+                                    <DropdownMenuItem
+                                        onClick={() => setDeletingUser(user)}
+                                        className="text-red-600 focus:text-red-600 cursor-pointer dark:focus:bg-zinc-900"
+                                        disabled={user.id === currentUser?.id}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" /> {t('admin.action.delete')}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between text-sm">
+                            <Badge variant={user.role === 'admin' ? "default" : "secondary"} className={user.role === 'admin' ? "" : "dark:bg-slate-800 dark:text-slate-300"}>
+                                {user.role || 'user'}
+                            </Badge>
+                            <div className="text-right text-xs text-slate-500">
+                                <div>Log: {formatDate(user.last_login_at)}</div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {/* Edit Dialog */}
