@@ -431,7 +431,7 @@ export default function BoardPage() {
                 />
 
                 <div className={cn("flex-1 p-2 sm:p-6 overflow-x-auto overflow-y-hidden", isPresentationMode && "p-0")}>
-                    <div className="flex gap-4 sm:gap-6 h-full min-w-max pb-4">
+                    <div className="flex gap-4 sm:gap-6 h-full pb-4 items-start w-max md:w-full md:items-stretch">
                         <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
                             {columns.map(col => (
                                 <BoardColumn
