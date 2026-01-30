@@ -97,51 +97,38 @@ export const triggerVisualReaction = (type: ReactionType) => {
             }
         }());
     } else if (type === 'applause') {
-        // Real Clapping: Center Hands
-        const leftHand = createCenteredElement('🫲', '120px');
-        const rightHand = createCenteredElement('🫱', '120px');
-
-        // Initial positioning
-        leftHand.style.left = '35%';
-        rightHand.style.left = '65%';
-
+        // Floating Claps (Medium-style)
+        const clapCount = 15;
         const duration = 2000;
 
-        // Keyframes: Hands start apart, move to center (overlap), move apart, repeat.
-        // Center is 50%. 
-        // Left hand hits 45% (overlap). Right hand hits 55% (overlap). Or both 50%.
+        for (let i = 0; i < clapCount; i++) {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                el.innerText = '👏';
+                el.style.position = 'fixed';
+                el.style.left = `calc(50% + ${Math.random() * 100 - 50}px)`; // Random X near center
+                el.style.top = '80%'; // Start from bottom-ish
+                el.style.fontSize = `${Math.floor(Math.random() * 20) + 24}px`; // Random size 24-44px
+                el.style.zIndex = '9999';
+                el.style.pointerEvents = 'none';
+                el.style.userSelect = 'none';
+                el.style.opacity = '0';
+                document.body.appendChild(el);
 
-        // Animate Left Hand (Approaches from Left)
-        const animL = leftHand.animate([
-            { transform: 'translate(-50%, -50%) scale(0) rotate(-20deg)', opacity: 0, left: '35%', offset: 0 },
-            { transform: 'translate(-50%, -50%) scale(1) rotate(-10deg)', opacity: 1, left: '35%', offset: 0.1 },
-            // Clap 1
-            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.3 }, // Hit center-ish
-            { transform: 'translate(-20%, -50%) rotate(-10deg) scale(1)', left: '35%', offset: 0.4 }, // Back
-            // Clap 2
-            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.6 },
-            { transform: 'translate(-20%, -50%) rotate(-10deg) scale(1)', left: '35%', offset: 0.7 },
-            // Clap 3
-            { transform: 'translate(20%, -50%) rotate(0deg) scale(1.1)', left: '42%', offset: 0.9 },
-            { transform: 'translate(-50%, -50%) scale(0) rotate(-20deg)', opacity: 0, offset: 1 }
-        ], { duration, fill: 'forwards' });
+                const animation = el.animate([
+                    { transform: 'translate(0, 0) scale(0.5)', opacity: 0 },
+                    { transform: 'translate(0, -50px) scale(1.2)', opacity: 1, offset: 0.2 }, // Pop in
+                    { transform: `translate(${Math.random() * 50 - 25}px, -200px) scale(1)`, opacity: 1, offset: 0.5 }, // Float up
+                    { transform: `translate(${Math.random() * 100 - 50}px, -400px) scale(0.8)`, opacity: 0, offset: 1 } // Fade out high
+                ], {
+                    duration: duration + Math.random() * 1000,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    fill: 'forwards'
+                });
 
-        // Animate Right Hand (Approaches from Right)
-        const animR = rightHand.animate([
-            { transform: 'translate(-50%, -50%) scale(0) rotate(20deg)', opacity: 0, left: '65%', offset: 0 },
-            { transform: 'translate(-50%, -50%) scale(1) rotate(10deg)', opacity: 1, left: '65%', offset: 0.1 },
-            // Clap 1
-            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.3 }, // Hit center-ish
-            { transform: 'translate(20%, -50%) rotate(10deg) scale(1)', left: '65%', offset: 0.4 }, // Back
-            // Clap 2
-            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.6 },
-            { transform: 'translate(20%, -50%) rotate(10deg) scale(1)', left: '65%', offset: 0.7 },
-            // Clap 3
-            { transform: 'translate(-20%, -50%) rotate(0deg) scale(1.1)', left: '58%', offset: 0.9 },
-            { transform: 'translate(-50%, -50%) scale(0) rotate(20deg)', opacity: 0, offset: 1 }
-        ], { duration, fill: 'forwards' });
-
-        animL.onfinish = () => { leftHand.remove(); rightHand.remove(); };
+                animation.onfinish = () => el.remove();
+            }, i * 50); // Stagger start
+        }
 
     } else if (type === 'rocket') {
         const rocket = createCenteredElement('🚀', '100px');
