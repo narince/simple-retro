@@ -1,7 +1,7 @@
 # RetroBoard 🚀
 
 <div align="center">
-  <img src="public/assets/logo.svg" alt="RetroBoard Logo" width="120" />
+  <img src="public/logo-icon.svg" alt="RetroBoard Logo" width="120" />
   <br />
   <br />
   <p>
