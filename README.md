@@ -2,7 +2,7 @@
 
 **RetroBoard** is a modern, real-time retrospective tool designed for agile teams to collaborate effectively. Built with a focus on user experience, performance, and visual appeal.
 
-![RetroBoard Preview](/public/assets/logo.svg)
+<img src="public/assets/logo.svg" alt="RetroBoard Preview" width="120" />
 
 ## ✨ Key Features
 
