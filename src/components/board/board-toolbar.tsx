@@ -83,7 +83,7 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
     };
 
     return (
-        <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-950 px-4 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:shadow-none">
+        <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-950 px-2 sm:px-4 flex items-center justify-between sticky top-0 z-10 shadow-sm dark:shadow-none overflow-x-auto no-scrollbar gap-4">
             {/* Left: Title */}
             <div className="flex items-center gap-4">
                 {isEditingTitle ? (
