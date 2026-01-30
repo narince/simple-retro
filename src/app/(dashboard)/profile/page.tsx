@@ -1,32 +1,46 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import {
+    Loader2, User as UserIcon, Camera, Mail, ArrowLeft, Upload, Link as LinkIcon, X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { dataService } from "@/services";
-import { User } from "@/services/types";
-import { ArrowLeft, User as UserIcon, Mail, Camera, Loader2 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import { dataService, User } from "@/services/api-service";
+import { useAppStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { ImageCropper } from "@/components/ui/image-cropper";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
-import { ImageCropper } from "@/components/common/image-cropper";
-import { useAppStore } from "@/lib/store";
+
 
 export default function ProfilePage() {
-    const router = useRouter();
     const { t } = useTranslation();
-    const setCurrentUser = useAppStore(state => state.setCurrentUser);
+    const router = useRouter();
+    const { currentUser, setCurrentUser } = useAppStore();
 
-    // Local state for form, but user object syncs with global if needed
-    const [user, setUser] = useState<User | null>(null);
-    const [name, setName] = useState("");
-    const [avatar, setAvatar] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [message, setMessage] = useState("");
+    const [user, setUser] = useState<User | null>(null);
+    const [name, setName] = useState("");
+    const [avatar, setAvatar] = useState<string | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
+    const [showUrlInput, setShowUrlInput] = useState(false);
+
+    const [activeTab, setActiveTab] = useState("general"); // For future tabs
+
+    // Image Cropper State
+    const [cropperOpen, setCropperOpen] = useState(false);
+    const [tempImage, setTempImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Mock premium check - in real app this would come from user.plan_id or subscription
@@ -58,7 +72,7 @@ export default function ProfilePage() {
                 setUser(updatedUser);
                 setCurrentUser(updatedUser); // Sync global header
                 setMessage(t('profile.success'));
-                setTimeout(() => setMessage(""), 3000);
+                setTimeout(() => setMessage(null), 3000);
             }
         } catch (error) {
             console.error(error);
@@ -68,40 +82,36 @@ export default function ProfilePage() {
         }
     };
 
-    const [cropperOpen, setCropperOpen] = useState(false);
-    const [tempImage, setTempImage] = useState<string | null>(null);
-
-    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) { // Increased limit to 5MB for high qual photos
-            alert("File size must be less than 5MB");
-            return;
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // Increased limit to 5MB for high qual photos
+                alert("File size must be less than 5MB");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                setTempImage(reader.result as string);
+                setCropperOpen(true);
+            };
+            reader.readAsDataURL(file);
         }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setTempImage(reader.result as string);
-            setCropperOpen(true);
-            // reset input so same file can be selected again if needed
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        };
-        reader.readAsDataURL(file);
+        // Reset input value to allow re-uploading the same file
+        e.target.value = '';
     };
 
     const handleCropComplete = async (croppedImage: string) => {
+        if (!user) return;
         setIsUploading(true);
-        // Optimistic update
-        setAvatar(croppedImage);
-
         try {
+            // Upload base64/blob to server or updated field
+            // dataService.updateUserAvatar will handle it
             await dataService.updateUserAvatar(croppedImage);
-            if (user) {
-                const updated = { ...user, avatar_url: croppedImage };
-                setUser(updated);
-                setCurrentUser(updated); // Sync global header
-            }
+
+            const updated = { ...user, avatar_url: croppedImage };
+            setUser(updated);
+            setCurrentUser(updated); // Sync global header
+            setAvatar(croppedImage); // Update local state for immediate feedback
         } catch (error) {
             console.error("Failed to upload avatar", error);
             alert(t('profile.error'));
@@ -119,16 +129,9 @@ export default function ProfilePage() {
             const updated = { ...user, avatar_url: url };
             setUser(updated);
             setCurrentUser(updated);
+            setAvatar(url);
             setMessage(t('profile.success'));
-            // Actually message is handled by query param usually? Or state.
-            // Let's use setMessage local state if I add it, but currently message comes from searchParams?
-            // Ah, line 191 shows `message` variable. It comes from `state`? 
-            // Wait, there is no `message` state defined in the snippet I saw.
-            // Let's check where `message` comes from (line 57?).
-            // If it's from useSearchParams, I can't set it easily. I'll alert or add local state.
-            // I'll assume I can just alert for now or set `setMessage`.
-            // Wait, I see `const [message, setMessage] = useState<string | null>(null);` usually.
-            // I'll check if I need to add state for message.
+            setShowUrlInput(false);
         } catch (error) {
             console.error("Failed to update avatar URL", error);
             alert(t('profile.error'));
@@ -167,17 +170,8 @@ export default function ProfilePage() {
                     </h1>
 
                     <div className="flex flex-col items-center mb-8">
-                        {/* Avatar Trigger Area */}
-
-                        {/* Profile Image with Overlay */}
-                        <div
-                            className="relative group cursor-pointer"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                fileInputRef.current?.click();
-                            }}
-                        >
+                        {/* Avatar Trigger Area - Opens Dropdown Logic is on Button below, clicking image triggers generic Change */}
+                        <div className="relative group">
                             <div className={cn(
                                 "h-24 w-24 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-inner flex items-center justify-center bg-slate-100",
                                 isUploading && "opacity-50"
@@ -189,11 +183,6 @@ export default function ProfilePage() {
                                 )}
                             </div>
 
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Camera className="h-6 w-6 text-white" />
-                            </div>
-
                             {isUploading && (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -201,55 +190,74 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        <div className="mt-4 flex flex-col items-center gap-2 w-full max-w-xs">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fileInputRef.current?.click()}
-                                disabled={isUploading}
-                            >
-                                {isUploading ? t('profile.saving') : t('profile.change_photo')}
-                            </Button>
-
-                            <div className="relative w-full flex items-center gap-2">
-                                <span className="text-xs text-slate-400 absolute left-0 -top-5 w-full text-center">{t('profile.or_enter_url')}</span>
-                                <Input
-                                    placeholder={t('profile.enter_photo_url_placeholder')}
-                                    className="h-8 text-xs"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const val = e.currentTarget.value;
-                                            if (val && val.startsWith('http')) {
-                                                handleAvatarUpdate(val);
-                                                e.currentTarget.value = '';
+                        <div className="mt-4 flex flex-col items-center gap-2 w-full max-w-sm">
+                            {showUrlInput ? (
+                                <div className="flex items-center gap-2 w-full animate-in fade-in slide-in-from-top-2">
+                                    <Input
+                                        placeholder={t('profile.enter_photo_url_placeholder')}
+                                        className="h-9 text-sm"
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = e.currentTarget.value;
+                                                if (val && val.startsWith('http')) {
+                                                    handleAvatarUpdate(val);
+                                                }
                                             }
-                                        }
-                                    }}
-                                    onChange={(e) => {
-                                        // Optional: Auto-load regex? No, explicit action is better.
-                                    }}
-                                />
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    className="h-8 px-2"
-                                    onClick={(e) => {
-                                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                                        if (input.value && input.value.startsWith('http')) {
-                                            handleAvatarUpdate(input.value);
-                                            input.value = '';
-                                        }
-                                    }}
-                                >
-                                    {t('profile.load_url')}
-                                </Button>
-                            </div>
+                                        }}
+                                    />
+                                    <Button
+                                        size="sm"
+                                        variant="default"
+                                        className="shrink-0"
+                                        onClick={(e) => {
+                                            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                            if (input.value && input.value.startsWith('http')) {
+                                                handleAvatarUpdate(input.value);
+                                            }
+                                        }}
+                                    >
+                                        {t('profile.load_url')}
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="shrink-0 h-9 w-9"
+                                        onClick={() => setShowUrlInput(false)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isUploading}
+                                        >
+                                            {isUploading ? t('profile.saving') : t('profile.change_photo')}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="center">
+                                        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer gap-2">
+                                            <Upload className="h-4 w-4" />
+                                            <span>Upload from Computer</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setShowUrlInput(true)} className="cursor-pointer gap-2">
+                                            <LinkIcon className="h-4 w-4" />
+                                            <span>Enter URL</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
                         </div>
+
                         {message && (
                             <p className={cn(
                                 "mt-2 text-sm font-medium animate-in fade-in slide-in-from-top-1",
-                                message.includes("success") ? "text-green-600" : "text-red-600"
+                                message.includes("Failed") || message.includes("error") ? "text-red-600" : "text-green-600"
                             )}>
                                 {message}
                             </p>
