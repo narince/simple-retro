@@ -2,14 +2,28 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Layout, Zap, Users } from "lucide-react";
+import { ArrowRight, Layout, Zap, Users, Menu } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { ModeToggle } from "@/components/mode-toggle";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { useAppStore } from "@/lib/store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const { t } = useTranslation();
+  const { setTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-100 dark:bg-zinc-950 dark:text-slate-50">
@@ -27,19 +41,67 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4">
-            <ModeToggle />
-            <LanguageSwitcher />
-            <Link
-              href="/login"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
-            >
-              {t('header.login')}
-            </Link>
-            <Link href="/login?mode=signup">
-              <Button className="rounded-full bg-slate-900 px-6 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200">
-                {t('login.signup_action')}
-              </Button>
-            </Link>
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <ModeToggle />
+              <LanguageSwitcher />
+              <Link
+                href="/login"
+                className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+              >
+                {t('header.login')}
+              </Link>
+              <Link href="/login?mode=signup">
+                <Button className="rounded-full bg-slate-900 px-6 text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200">
+                  {t('login.signup_action')}
+                </Button>
+              </Link>
+            </div>
+
+            {/* Mobile Actions (Hamburger) */}
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/login" className="flex w-full cursor-pointer font-medium">
+                      {t('header.login')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login?mode=signup" className="flex w-full cursor-pointer font-bold text-blue-600">
+                      {t('login.signup_action')}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>{t('header.theme')}</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem onClick={() => setTheme('light')}>{t('theme.light')}</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme('dark')}>{t('theme.dark')}</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme('system')}>{t('theme.system')}</DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>{t('header.language')}</DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('tr')}>Türkçe</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => useAppStore.getState().setLanguage('en')}>English</DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </nav>
