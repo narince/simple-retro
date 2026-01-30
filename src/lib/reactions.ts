@@ -97,29 +97,34 @@ export const triggerVisualReaction = (type: ReactionType) => {
             }
         }());
     } else if (type === 'applause') {
-        // Floating Claps (Medium-style)
-        const clapCount = 15;
-        const duration = 2000;
+        // Floating Claps (Medium-style) - Intensified
+        const clapCount = 35; // Increased from 15
+        const duration = 2500;
 
         for (let i = 0; i < clapCount; i++) {
             setTimeout(() => {
                 const el = document.createElement('div');
                 el.innerText = '👏';
                 el.style.position = 'fixed';
-                el.style.left = `calc(50% + ${Math.random() * 100 - 50}px)`; // Random X near center
-                el.style.top = '80%'; // Start from bottom-ish
-                el.style.fontSize = `${Math.floor(Math.random() * 20) + 24}px`; // Random size 24-44px
+                // Wide spread: Start horizontally distributed across 80% of screen center
+                const randomX = (Math.random() * 80) + 10; // 10% to 90% vw
+                el.style.left = `${randomX}vw`;
+                el.style.top = '85%'; // Start slightly lower
+                el.style.fontSize = `${Math.floor(Math.random() * 24) + 20}px`; // Random size 20-44px
                 el.style.zIndex = '9999';
                 el.style.pointerEvents = 'none';
                 el.style.userSelect = 'none';
                 el.style.opacity = '0';
                 document.body.appendChild(el);
 
+                // Random sway direction
+                const xSway = (Math.random() - 0.5) * 100; // -50px to +50px sway
+
                 const animation = el.animate([
                     { transform: 'translate(0, 0) scale(0.5)', opacity: 0 },
-                    { transform: 'translate(0, -50px) scale(1.2)', opacity: 1, offset: 0.2 }, // Pop in
-                    { transform: `translate(${Math.random() * 50 - 25}px, -200px) scale(1)`, opacity: 1, offset: 0.5 }, // Float up
-                    { transform: `translate(${Math.random() * 100 - 50}px, -400px) scale(0.8)`, opacity: 0, offset: 1 } // Fade out high
+                    { transform: `translate(${xSway * 0.2}px, -60px) scale(1.2)`, opacity: 1, offset: 0.2 }, // Pop in
+                    { transform: `translate(${xSway * 0.5}px, -300px) scale(1)`, opacity: 1, offset: 0.5 }, // Float up
+                    { transform: `translate(${xSway}px, -600px) scale(0.8)`, opacity: 0, offset: 1 } // Fade out high
                 ], {
                     duration: duration + Math.random() * 1000,
                     easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -127,7 +132,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
                 });
 
                 animation.onfinish = () => el.remove();
-            }, i * 50); // Stagger start
+            }, i * 30); // Faster stagger for bigger burst feel
         }
 
     } else if (type === 'rocket') {
