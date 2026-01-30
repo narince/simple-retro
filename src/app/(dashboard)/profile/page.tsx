@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/lib/i18n";
-import { dataService, User } from "@/services/api-service";
+import { dataService } from "@/services";
+import { User } from "@/services/types";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ImageCropper } from "@/components/ui/image-cropper";
+import { ImageCropper } from "@/components/common/image-cropper";
 import {
     DropdownMenu,
     DropdownMenuContent,

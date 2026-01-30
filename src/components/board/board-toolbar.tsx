@@ -2,8 +2,19 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-    Search, ArrowUpDown, Eye, EyeOff, Timer, ChevronDown,
-    Settings, Columns, Plus, Smile, Trash2, Cloud, MoreHorizontal
+    Search, ArrowUpDown, Eye, EyeOff, Timer, MoreHorizontal,
+    Settings,
+    Plus,
+    Columns,
+    Smile,
+    PartyPopper,
+    Rocket,
+    Lightbulb,
+    Star,
+    Diamond,
+    Hand,
+    Sparkles,
+    ChevronDown
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -18,7 +29,7 @@ import {
 import { BoardSettingsSidebar } from "./board-settings-sidebar";
 import { TimerWidget } from "./timer-widget";
 import { dataService } from "@/services";
-import { VozolIcon } from "@/components/icons/vozol-icon";
+// import { VozolIcon } from "@/components/icons/vozol-icon"; // Removed unused
 
 interface BoardToolbarProps {
     onAddCard: () => void;
@@ -163,9 +174,11 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('❤️')} className="text-xl">❤️</Button>
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('🎉')} className="text-xl">🎉</Button>
                             <Button variant="ghost" size="icon" onClick={() => triggerReaction('👍')} className="text-xl">👍</Button>
-                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('vozol')} className="text-xl overflow-visible">
-                                <VozolIcon className="h-10 w-auto drop-shadow-sm scale-[1.8] origin-center" />
-                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('👏')} className="text-xl">👏</Button>
+                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🚀')} className="text-xl">🚀</Button>
+                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('💡')} className="text-xl">💡</Button>
+                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('⭐')} className="text-xl">⭐</Button>
+                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('💎')} className="text-xl">💎</Button>
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>

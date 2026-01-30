@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti';
 
-type ReactionType = 'fire' | 'celebrate' | 'love' | 'thumbsup' | 'cry';
+export type ReactionType = 'fire' | 'celebrate' | 'love' | 'thumbsup' | 'cry' | 'applause' | 'rocket' | 'bulb' | 'star' | 'gem';
 
 export const triggerVisualReaction = (type: ReactionType) => {
     const duration = 2000;
@@ -30,19 +30,20 @@ export const triggerVisualReaction = (type: ReactionType) => {
         }, 50);
 
     } else if (type === 'love') {
+        // ... (keep same)
         const duration = 1500;
         const end = Date.now() + duration;
 
         (function frame() {
-            // Hearts (Simulated with stars or circles if stars fail, but trying star)
+            // Hearts
             confetti({
                 particleCount: 3,
                 angle: 60,
                 spread: 55,
                 origin: { x: 0, y: 1 },
                 colors: ['#ec4899', '#f43f5e'],
-                shapes: ['star', 'circle'],
-                scalar: 2 // Big
+                shapes: ['circle'],
+                scalar: 2
             });
             confetti({
                 particleCount: 3,
@@ -50,7 +51,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
                 spread: 55,
                 origin: { x: 1, y: 1 },
                 colors: ['#ec4899', '#f43f5e'],
-                shapes: ['star', 'circle'],
+                shapes: ['circle'],
                 scalar: 2
             });
 
@@ -59,7 +60,6 @@ export const triggerVisualReaction = (type: ReactionType) => {
             }
         }());
     } else if (type === 'thumbsup') {
-        // ... (keep same)
         confetti({
             particleCount: 80,
             spread: 70,
@@ -69,7 +69,7 @@ export const triggerVisualReaction = (type: ReactionType) => {
             scalar: 1.2
         });
     } else if (type === 'cry') {
-        // ... (keep same)
+        // Rain / Tears
         const end = Date.now() + 2000;
         (function frame() {
             confetti({
@@ -87,8 +87,82 @@ export const triggerVisualReaction = (type: ReactionType) => {
                 requestAnimationFrame(frame);
             }
         }());
+    } else if (type === 'applause') {
+        // Gold and Silver confetti from bottom corners
+        const end = Date.now() + 1500;
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#fbbf24', '#fcd34d', '#e5e7eb'], // Gold, Silver
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#fbbf24', '#fcd34d', '#e5e7eb'],
+            });
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    } else if (type === 'rocket') {
+        // Upward burst from center
+        confetti({
+            particleCount: 150,
+            spread: 10,
+            origin: { y: 1 },
+            startVelocity: 60,
+            colors: ['#ef4444', '#e2e8f0'], // Red and White
+            gravity: 0.2,
+            ticks: 100
+        });
+    } else if (type === 'bulb') {
+        // Idea / Light: Center burst of yellow/white
+        confetti({
+            particleCount: 100,
+            spread: 360,
+            origin: { x: 0.5, y: 0.4 },
+            colors: ['#fef08a', '#ffffff', '#eab308'], // Yellows
+            startVelocity: 20,
+            gravity: 0,
+            ticks: 50,
+            scalar: 1.2
+        });
+    } else if (type === 'star') {
+        // Stars everywhere
+        const end = Date.now() + 1000;
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 90,
+                spread: 360,
+                origin: { x: Math.random(), y: Math.random() - 0.2 },
+                colors: ['#fbbf24', '#f59e0b'],
+                shapes: ['star'],
+                scalar: 1.5,
+                startVelocity: 15
+            });
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    } else if (type === 'gem') {
+        // Premium feel: Blue/Purple/Cyan
+        confetti({
+            particleCount: 100,
+            spread: 160,
+            origin: { y: 0.6 },
+            colors: ['#8b5cf6', '#3b82f6', '#06b6d4'],
+            shapes: ['square'], // "Gems"
+            scalar: 1.2,
+            flat: true
+        });
     } else {
-        // Celebrate
+        // Celebrate (Default)
         confetti({
             particleCount: 150,
             spread: 120,
@@ -103,10 +177,12 @@ export const broadcastReaction = (type: ReactionType) => {
     // Show locally
     triggerVisualReaction(type);
 
-    // Broadcast via localStorage
+    // Broadcast via localStorage (This only works for same browser tabs)
     localStorage.setItem('reaction-event', JSON.stringify({
         type,
         timestamp: Date.now(),
-        id: Math.random().toString(36).substring(7) // Unique ID to force change event
+        id: Math.random().toString(36).substring(7)
     }));
+
+    // TODO: Implement Real-time broadcast using Database/Supabase if needed for cross-device support
 };
