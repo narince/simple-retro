@@ -196,28 +196,40 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                     <div className="md:hidden">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="h-8 w-8 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 font-bold shrink-0 z-10 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">
+                                <button className={cn(
+                                    "h-8 w-8 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 z-10 transition-colors",
+                                    activeUserFilter
+                                        ? "bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200"
+                                        : "bg-slate-100 dark:bg-zinc-800 border-white dark:border-zinc-900 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
+                                )}>
                                     {sortedMembers.length}
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="dark:bg-zinc-950 dark:border-slate-800">
                                 <div className="max-h-48 overflow-y-auto p-1">
-                                    {sortedMembers.map((user: any) => (
-                                        <DropdownMenuItem
-                                            key={user.id}
-                                            onClick={() => onMemberClick?.(user.id)}
-                                            className="flex items-center gap-2 cursor-pointer"
-                                        >
-                                            <div className="h-6 w-6 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden text-[10px] uppercase font-bold text-slate-500">
-                                                {user.avatar_url ? (
-                                                    <img src={user.avatar_url} className="h-full w-full object-cover" />
-                                                ) : (
-                                                    (user.full_name || user.email).substring(0, 2)
+                                    {sortedMembers.map((user: any) => {
+                                        const isActive = activeUserFilter === user.id;
+                                        return (
+                                            <DropdownMenuItem
+                                                key={user.id}
+                                                onClick={() => onMemberClick?.(user.id)}
+                                                className={cn(
+                                                    "flex items-center gap-2 cursor-pointer",
+                                                    isActive && "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                                                 )}
-                                            </div>
-                                            <span className="text-sm truncate max-w-[150px]">{user.full_name || user.email}</span>
-                                        </DropdownMenuItem>
-                                    ))}
+                                            >
+                                                <div className="h-6 w-6 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden text-[10px] uppercase font-bold text-slate-500">
+                                                    {user.avatar_url ? (
+                                                        <img src={user.avatar_url} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        (user.full_name || user.email).substring(0, 2)
+                                                    )}
+                                                </div>
+                                                <span className="text-sm truncate max-w-[150px]">{user.full_name || user.email}</span>
+                                                {isActive && <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />}
+                                            </DropdownMenuItem>
+                                        );
+                                    })}
                                 </div>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -348,13 +360,13 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                             {/* Blur */}
                             <DropdownMenuItem onClick={() => setIsContentBlur(!isContentBlur)} className="gap-2 cursor-pointer">
                                 {isContentBlur ? <EyeOff className="h-4 w-4 text-blue-500" /> : <Eye className="h-4 w-4" />}
-                                <span>{isContentBlur ? "Reveal Content" : "Blur Content"}</span>
+                                <span>{isContentBlur ? t('board.reveal_content') : t('board.blur_content')}</span>
                             </DropdownMenuItem>
 
                             {/* Settings */}
                             <DropdownMenuItem onClick={() => setIsSettingsOpen(true)} className="gap-2 cursor-pointer">
                                 <Settings className="h-4 w-4" />
-                                <span>Settings</span>
+                                <span>{t('board.settings')}</span>
                             </DropdownMenuItem>
 
                             {/* Timer */}
