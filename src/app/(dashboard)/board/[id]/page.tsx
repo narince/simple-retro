@@ -23,6 +23,7 @@ import {
     DragEndEvent
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { triggerVisualReaction } from '@/lib/reactions';
 import { BoardCard } from '@/components/board/board-card';
 import { dataService } from '@/services';
 import { Board, Column, Card } from '@/services/types';
@@ -147,7 +148,43 @@ export default function BoardPage() {
 
         };
         load();
-    }, [params?.id, router, currentUser]); // Added currentUser dependency to refresh when user loads
+    }, [params?.id, router, currentUser]);
+
+    // Handle Reactions
+    useEffect(() => {
+        const handleLocalReaction = (e: CustomEvent) => {
+            const { emoji, type } = e.detail;
+            // Use type if available, otherwise map emoji (fallback)
+            if (type) {
+                triggerVisualReaction(type);
+            } else {
+                // Legacy fallback or if type missing
+                // triggerVisualReaction(emoji); // This would fail if emoji is '🚀'
+                // We assume sender sends type now.
+            }
+        };
+
+        const handleStorageReaction = (e: StorageEvent) => {
+            if (e.key === 'reaction-event' && e.newValue) {
+                try {
+                    const data = JSON.parse(e.newValue);
+                    if (data.type) {
+                        triggerVisualReaction(data.type);
+                    }
+                } catch (err) {
+                    console.error("Reaction parse error", err);
+                }
+            }
+        };
+
+        window.addEventListener('retro-reaction' as any, handleLocalReaction);
+        window.addEventListener('storage', handleStorageReaction);
+
+        return () => {
+            window.removeEventListener('retro-reaction' as any, handleLocalReaction);
+            window.removeEventListener('storage', handleStorageReaction);
+        };
+    }, []);
 
     const handleAddCard = async (columnId: string, content: string, isAnonymous?: boolean) => {
         if (!board || !content.trim()) return;

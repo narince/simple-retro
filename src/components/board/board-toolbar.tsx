@@ -25,6 +25,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { BoardSettingsSidebar } from "./board-settings-sidebar";
 import { TimerWidget } from "./timer-widget";
@@ -82,13 +86,41 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
     };
 
     const triggerReaction = async (emoji: string) => {
-        // Visual effect logic would go here or be triggered via a global event/store
-        // For now, just broadcast
+        let type: any = 'celebrate';
+        switch (emoji) {
+            case '🔥': type = 'fire'; break;
+            case '❤️': type = 'love'; break;
+            case '🎉': type = 'celebrate'; break;
+            case '👍': type = 'thumbsup'; break;
+            case '👏': type = 'applause'; break;
+            case '🚀': type = 'rocket'; break;
+            case '💡': type = 'bulb'; break;
+            case '⭐': type = 'star'; break;
+            case '💎': type = 'gem'; break;
+        }
+
+        // Trigger local visual effect immediately
+        // We need to import triggerVisualReaction or just dispatch event for it?
+        // Actually reactions.ts exports broadcastReaction but here we use dataService.
+        // Let's use the event listener in BoardPage to handle visual.
+        // BoardPage likely listens to 'retro-reaction'.
+
         const user = await dataService.getCurrentUser();
         if (user && boardId) {
             const reactionId = crypto.randomUUID();
-            // Dispatch local event first with ID
-            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji, id: reactionId } }));
+            // Dispatch local event first with ID + TYPE (Mapped)
+            // Wait, previous code sent { emoji, id }.
+            // Does the listener expect 'emoji' or 'type'?
+            // If the listener expects 'type', I should send 'type'.
+            // If the listener expects 'emoji', does IT do the mapping?
+            // Let's check BoardPage or wherever the listener is. Assuming it uses this event to trigger visual.
+            // If I change detail to Include Type, it's safer.
+            // Or I can change 'emoji' to 'type' if the listener handles strings.
+
+            // Actually, best bet: send BOTH.
+            window.dispatchEvent(new CustomEvent('retro-reaction', { detail: { emoji, type, id: reactionId } }));
+
+            // Broadcast
             await dataService.broadcastReaction(boardId, emoji, user.id, reactionId);
         }
     };
@@ -368,6 +400,47 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                                 <ArrowUpDown className="h-4 w-4" />
                                 <span>{t('board.sort_votes')}</span>
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+
+                            {/* Reactions Submenu */}
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                    <Smile className="mr-2 h-4 w-4" />
+                                    <span>Reactions</span>
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                    <DropdownMenuSubContent className="dark:bg-zinc-950 dark:border-slate-800">
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🔥'); triggerReaction('🔥'); }}>
+                                            <span className="mr-2">🔥</span> <span>{t('reaction.fire')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '❤️'); triggerReaction('❤️'); }}>
+                                            <span className="mr-2">❤️</span> <span>{t('reaction.love')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🎉'); triggerReaction('🎉'); }}>
+                                            <span className="mr-2">🎉</span> <span>{t('reaction.celebrate')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '👍'); triggerReaction('👍'); }}>
+                                            <span className="mr-2">👍</span> <span>{t('reaction.thumbsup')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '👏'); triggerReaction('👏'); }}>
+                                            <span className="mr-2">👏</span> <span>{t('reaction.applause')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🚀'); triggerReaction('🚀'); }}>
+                                            <span className="mr-2">🚀</span> <span>{t('reaction.rocket')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '💡'); triggerReaction('💡'); }}>
+                                            <span className="mr-2">💡</span> <span>{t('reaction.bulb')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '⭐'); triggerReaction('⭐'); }}>
+                                            <span className="mr-2">⭐</span> <span>{t('reaction.star')}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '💎'); triggerReaction('💎'); }}>
+                                            <span className="mr-2">💎</span> <span>{t('reaction.gem')}</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                            </DropdownMenuSub>
+
                             <DropdownMenuSeparator />
 
                             {/* Blur */}

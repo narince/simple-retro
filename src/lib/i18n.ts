@@ -275,6 +275,17 @@ const translations = {
         'profile.upload_from_computer': 'Upload from Computer',
         'profile.enter_url': 'Enter URL',
 
+        // Reactions
+        'reaction.fire': 'Fire',
+        'reaction.love': 'Love',
+        'reaction.celebrate': 'Celebrate',
+        'reaction.thumbsup': 'Like',
+        'reaction.applause': 'Applause',
+        'reaction.rocket': 'Rocket',
+        'reaction.bulb': 'Idea',
+        'reaction.star': 'Star',
+        'reaction.gem': 'Gem',
+
         // Static Pages
         'privacy.title': 'Privacy Policy',
         'privacy.content': 'This privacy policy explains how we handle your data...',
@@ -593,6 +604,17 @@ const translations = {
         'profile.invalid_url': 'Geçersiz URL',
         'profile.upload_from_computer': 'Bilgisayardan Yükle',
         'profile.enter_url': 'URL Girin',
+
+        // Reactions
+        'reaction.fire': 'Ateş',
+        'reaction.love': 'Kalp',
+        'reaction.celebrate': 'Kutlama',
+        'reaction.thumbsup': 'Beğen',
+        'reaction.applause': 'Alkış',
+        'reaction.rocket': 'Roket',
+        'reaction.bulb': 'Fikir',
+        'reaction.star': 'Yıldız',
+        'reaction.gem': 'Elmas',
     }
 };
 
