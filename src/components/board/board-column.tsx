@@ -152,7 +152,6 @@ export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle,
     })();
 
     return (
-    return (
         <div className="flex flex-col h-full min-h-[500px] w-[85vw] sm:w-[350px] xl:w-[400px] bg-transparent shrink-0">
             {/* Header: Minimalist with colored dot & Editable Title */}
             <div className="flex items-center gap-2 mb-2 px-1 group justify-between">
