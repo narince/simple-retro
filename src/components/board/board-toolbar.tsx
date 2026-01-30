@@ -191,8 +191,39 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                         <span className="text-xs font-semibold">+ {t('board.invite')}</span>
                     </Button>
 
-                    {/* Member Avatars */}
-                    <div className="flex -space-x-2 pl-2 items-center py-1">
+                    {/* Mobile: Users Button Triggering Dropdown with everyone */}
+                    <div className="md:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="h-8 w-8 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400 font-bold shrink-0 z-10 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">
+                                    {sortedMembers.length}
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="dark:bg-zinc-950 dark:border-slate-800">
+                                <div className="max-h-48 overflow-y-auto p-1">
+                                    {sortedMembers.map((user: any) => (
+                                        <DropdownMenuItem
+                                            key={user.id}
+                                            onClick={() => onMemberClick?.(user.id)}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <div className="h-6 w-6 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden text-[10px] uppercase font-bold text-slate-500">
+                                                {user.avatar_url ? (
+                                                    <img src={user.avatar_url} className="h-full w-full object-cover" />
+                                                ) : (
+                                                    (user.full_name || user.email).substring(0, 2)
+                                                )}
+                                            </div>
+                                            <span className="text-sm truncate max-w-[150px]">{user.full_name || user.email}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </div>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+
+                    {/* Desktop: Avatars + Overflow */}
+                    <div className="hidden md:flex -space-x-2 pl-2 items-center py-1">
                         {sortedMembers.slice(0, 5).map((user: any) => {
                             const isActive = activeUserFilter === user.id;
                             const isMe = currentUser && user.id === currentUser.id;
