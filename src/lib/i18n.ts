@@ -286,6 +286,8 @@ const translations = {
         'reaction.star': 'Star',
         'reaction.gem': 'Gem',
 
+        'board.reactions': 'Reactions',
+
         // Static Pages
         'privacy.title': 'Privacy Policy',
         'privacy.content': 'This privacy policy explains how we handle your data...',
@@ -615,6 +617,8 @@ const translations = {
         'reaction.bulb': 'Fikir',
         'reaction.star': 'Yıldız',
         'reaction.gem': 'Elmas',
+
+        'board.reactions': 'Reaksiyonlar',
     }
 };
 

@@ -404,39 +404,23 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
 
                             {/* Reactions Submenu */}
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                    <Smile className="mr-2 h-4 w-4" />
-                                    <span>Reactions</span>
+                                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                                    <Smile className="h-4 w-4" />
+                                    <span>{t('board.reactions')}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
-                                    <DropdownMenuSubContent className="dark:bg-zinc-950 dark:border-slate-800">
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🔥'); triggerReaction('🔥'); }}>
-                                            <span className="mr-2">🔥</span> <span>{t('reaction.fire')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '❤️'); triggerReaction('❤️'); }}>
-                                            <span className="mr-2">❤️</span> <span>{t('reaction.love')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🎉'); triggerReaction('🎉'); }}>
-                                            <span className="mr-2">🎉</span> <span>{t('reaction.celebrate')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '👍'); triggerReaction('👍'); }}>
-                                            <span className="mr-2">👍</span> <span>{t('reaction.thumbsup')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '👏'); triggerReaction('👏'); }}>
-                                            <span className="mr-2">👏</span> <span>{t('reaction.applause')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '🚀'); triggerReaction('🚀'); }}>
-                                            <span className="mr-2">🚀</span> <span>{t('reaction.rocket')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '💡'); triggerReaction('💡'); }}>
-                                            <span className="mr-2">💡</span> <span>{t('reaction.bulb')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '⭐'); triggerReaction('⭐'); }}>
-                                            <span className="mr-2">⭐</span> <span>{t('reaction.star')}</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => { console.log('Reaction triggered:', '💎'); triggerReaction('💎'); }}>
-                                            <span className="mr-2">💎</span> <span>{t('reaction.gem')}</span>
-                                        </DropdownMenuItem>
+                                    <DropdownMenuSubContent className="dark:bg-zinc-950 dark:border-slate-800 p-2 min-w-0 w-auto">
+                                        <div className="grid grid-cols-5 gap-2">
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🔥')} className="h-8 w-8 text-lg">🔥</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('❤️')} className="h-8 w-8 text-lg">❤️</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🎉')} className="h-8 w-8 text-lg">🎉</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('👍')} className="h-8 w-8 text-lg">👍</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('👏')} className="h-8 w-8 text-lg">👏</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('🚀')} className="h-8 w-8 text-lg">🚀</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('💡')} className="h-8 w-8 text-lg">💡</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('⭐')} className="h-8 w-8 text-lg">⭐</Button>
+                                            <Button variant="ghost" size="icon" onClick={() => triggerReaction('💎')} className="h-8 w-8 text-lg">💎</Button>
+                                        </div>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
