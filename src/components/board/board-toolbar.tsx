@@ -457,9 +457,10 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+            </div>
 
-                <BoardSettingsSidebar isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} boardId={boardId} />
-                <TimerWidget open={isTimerOpen} onOpenChange={setIsTimerOpen} />
-            </div >
-            );
+            <BoardSettingsSidebar isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} boardId={boardId} />
+            <TimerWidget open={isTimerOpen} onOpenChange={setIsTimerOpen} />
+        </div >
+    );
 }

@@ -175,6 +175,7 @@ const translations = {
         'settings.feature.password': 'Password',
 
         'settings.exit_presentation': 'Exit Presentation Mode',
+        'board.gifs': 'GIFs',
 
         // Profile
         'profile.title': 'Profile Settings',
@@ -622,6 +623,7 @@ const translations = {
 
         'board.reactions': 'Reaksiyonlar',
         'settings.exit_presentation': 'Sunum Modundan Çık',
+        'board.gifs': 'GIFler',
     }
 };
 
