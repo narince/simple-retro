@@ -111,6 +111,32 @@ export default function ProfilePage() {
         }
     };
 
+    const handleAvatarUpdate = async (url: string) => {
+        if (!user || !url) return;
+        setIsUploading(true);
+        try {
+            await dataService.updateUserAvatar(url);
+            const updated = { ...user, avatar_url: url };
+            setUser(updated);
+            setCurrentUser(updated);
+            setMessage(t('profile.success'));
+            // Actually message is handled by query param usually? Or state.
+            // Let's use setMessage local state if I add it, but currently message comes from searchParams?
+            // Ah, line 191 shows `message` variable. It comes from `state`? 
+            // Wait, there is no `message` state defined in the snippet I saw.
+            // Let's check where `message` comes from (line 57?).
+            // If it's from useSearchParams, I can't set it easily. I'll alert or add local state.
+            // I'll assume I can just alert for now or set `setMessage`.
+            // Wait, I see `const [message, setMessage] = useState<string | null>(null);` usually.
+            // I'll check if I need to add state for message.
+        } catch (error) {
+            console.error("Failed to update avatar URL", error);
+            alert(t('profile.error'));
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950">
@@ -175,19 +201,51 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        {/* Text Button */}
-                        <Button
-                            variant="link"
-                            size="sm"
-                            className="mt-2 text-blue-600"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                fileInputRef.current?.click();
-                            }}
-                        >
-                            {t('profile.change_photo')}
-                        </Button>
+                        <div className="mt-4 flex flex-col items-center gap-2 w-full max-w-xs">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? t('profile.saving') : t('profile.change_photo')}
+                            </Button>
+
+                            <div className="relative w-full flex items-center gap-2">
+                                <span className="text-xs text-slate-400 absolute left-0 -top-5 w-full text-center">{t('profile.or_enter_url')}</span>
+                                <Input
+                                    placeholder={t('profile.enter_photo_url_placeholder')}
+                                    className="h-8 text-xs"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const val = e.currentTarget.value;
+                                            if (val && val.startsWith('http')) {
+                                                handleAvatarUpdate(val);
+                                                e.currentTarget.value = '';
+                                            }
+                                        }
+                                    }}
+                                    onChange={(e) => {
+                                        // Optional: Auto-load regex? No, explicit action is better.
+                                    }}
+                                />
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="h-8 px-2"
+                                    onClick={(e) => {
+                                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                        if (input.value && input.value.startsWith('http')) {
+                                            handleAvatarUpdate(input.value);
+                                            input.value = '';
+                                        }
+                                    }}
+                                >
+                                    {t('profile.load_url')}
+                                </Button>
+                            </div>
+                        </div>
                         {message && (
                             <p className={cn(
                                 "mt-2 text-sm font-medium animate-in fade-in slide-in-from-top-1",

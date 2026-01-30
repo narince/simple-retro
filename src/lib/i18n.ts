@@ -261,6 +261,18 @@ const translations = {
         'admin.action.impersonate': 'Login as User',
         'admin.form.avatar_url': 'Avatar URL',
 
+        // New Mobile/Toolbar Added
+        'board.settings': 'Settings',
+        'board.blur_content': 'Blur Content',
+        'board.reveal_content': 'Reveal Content',
+        'board.blur_toggle': 'Blur',
+
+        // Profile URL
+        'profile.or_enter_url': 'or enter URL',
+        'profile.enter_photo_url_placeholder': 'https://example.com/photo.jpg',
+        'profile.load_url': 'Load',
+        'profile.invalid_url': 'Invalid URL',
+
         // Static Pages
         'privacy.title': 'Privacy Policy',
         'privacy.content': 'This privacy policy explains how we handle your data...',
@@ -565,6 +577,18 @@ const translations = {
         'admin.export_excel': 'Veritabanını Dışa Aktar (Excel)',
         'admin.action.impersonate': 'Hesabına Geçiş Yap',
         'admin.form.avatar_url': 'Profil Fotoğrafı URL',
+
+        // New Mobile/Toolbar Added
+        'board.settings': 'Ayarlar',
+        'board.blur_content': 'İçeriği Bulanıklaştır',
+        'board.reveal_content': 'İçeriği Göster',
+        'board.blur_toggle': 'Bulanıklık',
+
+        // Profile URL
+        'profile.or_enter_url': 'veya URL girin',
+        'profile.enter_photo_url_placeholder': 'https://example.com/photo.jpg',
+        'profile.load_url': 'Yükle',
+        'profile.invalid_url': 'Geçersiz URL',
     }
 };
 
