@@ -131,5 +131,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <p>Made with ❤️ by the RetroBoard Team</p>
+  <p>Made with ❤️ by <a href="https://www.tolganarince.com" target="_blank">Tolga Narince</a></p>
 </div>
