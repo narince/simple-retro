@@ -394,15 +394,22 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                             />
 
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className={cn("h-7 w-7 transition-colors", isCommentAnonymous ? "text-blue-400 bg-blue-400/10" : "text-white/50 hover:text-white")}
+                            <button
+                                type="button"
+                                className={cn(
+                                    "flex items-center gap-1.5 cursor-pointer px-1.5 py-0.5 rounded transition-colors select-none h-7",
+                                    isCommentAnonymous ? "bg-slate-800 dark:bg-slate-700 text-white" : "text-white/50 hover:bg-white/10 hover:text-white"
+                                )}
                                 onClick={() => setIsCommentAnonymous(!isCommentAnonymous)}
                                 title="Post Anonymously"
                             >
-                                <Ghost className="h-4 w-4" />
-                            </Button>
+                                <div className={cn("relative flex items-center justify-center transition-all", isCommentAnonymous ? "scale-110" : "scale-100")}>
+                                    <Ghost className={cn("h-3.5 w-3.5 transition-colors", isCommentAnonymous ? "text-white" : "text-current")} />
+                                </div>
+                                <span className={cn("text-[11px] font-medium transition-colors hidden sm:inline", isCommentAnonymous ? "text-white" : "text-current")}>
+                                    {isCommentAnonymous ? t('board.anonymous') : t('board.post_anonymously')}
+                                </span>
+                            </button>
 
                             <Button
                                 size="icon"
