@@ -278,8 +278,15 @@ export class ApiService implements IDataService {
         await fetch(`${API_BASE}/cards/${cardId}`, { method: 'PATCH', body: JSON.stringify({ color }) });
     }
 
-    async addComment(cardId: string, text: string, authorId: string): Promise<void> {
-        await fetch(`${API_BASE}/cards/${cardId}/comments`, { method: 'POST', body: JSON.stringify({ text, authorId }) });
+    async addComment(cardId: string, text: string, authorId: string, options?: { isAnonymous?: boolean, authorName?: string, authorAvatar?: string }): Promise<void> {
+        await fetch(`${API_BASE}/cards/${cardId}/comments`, {
+            method: 'POST',
+            body: JSON.stringify({
+                text,
+                authorId,
+                ...options
+            })
+        });
     }
     async deleteComment(cardId: string, commentId: string): Promise<void> {
         await fetch(`${API_BASE}/cards/${cardId}/comments/${commentId}`, { method: 'DELETE' });

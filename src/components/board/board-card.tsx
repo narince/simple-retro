@@ -397,11 +397,11 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className={cn("h-7 w-7", isCommentAnonymous ? "text-blue-300" : "text-white/50 hover:text-white")}
+                                className={cn("h-7 w-7 transition-colors", isCommentAnonymous ? "text-blue-400 bg-blue-400/10" : "text-white/50 hover:text-white")}
                                 onClick={() => setIsCommentAnonymous(!isCommentAnonymous)}
                                 title="Post Anonymously"
                             >
-                                <Ghost className={cn("h-4 w-4", isCommentAnonymous ? "fill-current" : "")} />
+                                <Ghost className="h-4 w-4" />
                             </Button>
 
                             <Button
