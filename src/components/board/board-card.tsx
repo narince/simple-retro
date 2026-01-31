@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter } from "@/components/ui/card";
-import { Heart, MessageSquare, MoreVertical, Trash2, Edit2, Palette, Send } from "lucide-react";
+import { Heart, MessageSquare, MoreVertical, Trash2, Edit2, Palette, Send, Ghost } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@/lib/store";
@@ -401,7 +401,7 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                 onClick={() => setIsCommentAnonymous(!isCommentAnonymous)}
                                 title="Post Anonymously"
                             >
-                                <img src="https://img.icons8.com/ios/50/ffffff/spy.png" className={cn("h-4 w-4 filter", isCommentAnonymous ? "brightness-150 drop-shadow-glow" : "invert")} alt="anon" />
+                                <Ghost className={cn("h-4 w-4", isCommentAnonymous ? "fill-current" : "")} />
                             </Button>
 
                             <Button
