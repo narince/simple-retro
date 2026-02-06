@@ -418,7 +418,7 @@ export default function BoardPage() {
             {/* Sprint Completed Overlay - VISIBLE FOR EVERYONE IF COMPLETED */}
             {/* Sprint Completed Overlay - VISIBLE FOR EVERYONE IF COMPLETED */}
             {board.is_completed && (
-                <div className="absolute inset-0 z-[50] flex items-center justify-center overflow-hidden bg-slate-50/60 dark:bg-zinc-950/80 backdrop-blur-sm transition-all duration-500 animate-in fade-in">
+                <div className="absolute inset-0 z-[50] flex items-center justify-center overflow-hidden bg-slate-50/60 dark:bg-zinc-950/80 backdrop-blur-sm transition-all duration-500 animate-in fade-in pointer-events-none">
                     <div className="flex flex-col items-center justify-center p-12 text-center pointer-events-auto">
                         <div className="h-20 w-20 bg-slate-900 dark:bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-bounce">
                             <Lock className="h-10 w-10 text-white dark:text-slate-900" />
