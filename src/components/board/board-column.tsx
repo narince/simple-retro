@@ -19,20 +19,25 @@ import {
     DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 
+import { Column } from "@/services/types";
+
 interface ColumnProps {
-    id: string;
-    title: string;
-    color: string;
+    column: Column;
     cards: Card[];
-    onAddCard: (id: string, content: string, isAnonymous?: boolean) => void;
+    onAddCard?: (id: string, content: string, isAnonymous?: boolean) => void;
     onUpdateTitle?: (id: string, newTitle: string) => void;
-    onDeleteColumn?: () => void;
-    onUpdateColor?: (color: string) => void;
-    onDeleteCard: (cardId: string) => void;
+    onDeleteColumn?: (id: string) => void;
+    onUpdateColor?: (id: string, color: string) => void;
+    onDeleteCard?: (cardId: string) => void;
     canVote?: boolean;
     onVote?: (cardId: string) => void;
     currentUserId?: string;
     isAdmin?: boolean;
+    isLocked?: boolean;
+    members?: any[];
+    authorName?: string;
+    onUpdateCard?: (id: string, content: string) => void;
+    isOverlay?: boolean;
 }
 
 const COLUMN_COLORS = [
@@ -44,7 +49,8 @@ const COLUMN_COLORS = [
     { name: "Yellow", class: "bg-yellow-500" },
 ];
 
-export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle, onDeleteColumn, onUpdateColor, onDeleteCard, canVote = true, onVote, currentUserId, isAdmin }: ColumnProps) {
+export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteColumn, onUpdateColor, onDeleteCard, canVote = true, onVote, currentUserId, isAdmin, isLocked, members, authorName, onUpdateCard, isOverlay }: ColumnProps) {
+    const { id, title, color } = column;
     const { setNodeRef } = useDroppable({ id });
     const { t } = useTranslation();
     const [animateRef] = useAutoAnimate();
@@ -69,12 +75,16 @@ export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle,
     }, [isAddingCard]);
 
     const handleTitleSubmit = () => {
-        setIsEditingTitle(false);
-        if (titleInput !== title && onUpdateTitle) {
-            onUpdateTitle(id, titleInput);
+        if (!titleInput.trim()) {
+            setTitleInput(title);
+            setIsEditingTitle(false);
+            return;
         }
+        if (titleInput !== title) {
+            onUpdateTitle?.(id, titleInput);
+        }
+        setIsEditingTitle(false);
     };
-
     const handleAddSubmit = () => {
         if (newCardContent.trim()) {
             onAddCard(id, newCardContent, isAnonymous);
@@ -200,14 +210,14 @@ export function BoardColumn({ id, title, color, cards, onAddCard, onUpdateTitle,
                                     <div
                                         key={c.name}
                                         className={cn("w-6 h-6 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition-transform", c.class)}
-                                        onClick={() => onUpdateColor?.(c.class)}
+                                        onClick={() => onUpdateColor?.(id, c.class)}
                                         title={t(`colors.${c.name.toLowerCase()}` as any)}
                                     />
                                 ))}
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={onDeleteColumn}>
+                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => onDeleteColumn?.(id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> {t('board.delete')}
                         </DropdownMenuItem>
                     </DropdownMenuContent>
