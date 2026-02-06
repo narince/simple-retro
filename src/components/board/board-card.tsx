@@ -46,9 +46,14 @@ const CARD_COLORS = [
     { name: "Purple", class: "bg-violet-600" },
     { name: "Blue", class: "bg-blue-600" },
     { name: "Yellow", class: "bg-yellow-500" },
+    { name: "Indigo", class: "bg-indigo-600" },
+    { name: "Orange", class: "bg-orange-500" },
+    { name: "Pink", class: "bg-pink-600" },
+    { name: "Gray", class: "bg-slate-500" },
+    { name: "Cyan", class: "bg-cyan-600" },
 ];
 
-export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous, authorId, currentUserId, isAdmin }: BoardCardProps) {
+export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous, authorId, currentUserId, isAdmin, isLocked }: BoardCardProps) {
     const { isContentBlur, disableVoting } = useAppStore();
     const { t } = useTranslation();
 
@@ -75,9 +80,10 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
     }, [initialComments]);
 
     // Permission Logic
-    // Card can be deleted by Creator OR Admin
-    // Comments can be deleted by Creator OR Admin
-    const canDeleteCard = isAdmin || (currentUserId && authorId === currentUserId);
+    // Card can be deleted/edited by Creator OR Admin
+    // If Locked, ONLY Admin can action
+    const canEditCard = isAdmin || (!isLocked && currentUserId && authorId === currentUserId);
+    const canDeleteCard = canEditCard;
 
     const [content, setContent] = useState(initialContent);
     const [isEditing, setIsEditing] = useState(false);
@@ -248,46 +254,48 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                 style={cardColor && cardColor.startsWith('#') ? { backgroundColor: cardColor } : undefined}
             >
                 {/* Kebab Menu - Drag Safe Area */}
-                <div className="absolute top-1 right-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity" onPointerDown={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white hover:bg-black/20 rounded-sm">
-                                <MoreVertical className="h-3.5 w-3.5" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                                <Edit2 className="mr-2 h-4 w-4" /> {t('board.edit')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setIsCommentsOpen(!isCommentsOpen)}>
-                                <MessageSquare className="mr-2 h-4 w-4" /> {isCommentsOpen ? t('board.hide_comments') : t('board.show_comments')}
-                            </DropdownMenuItem>
-                            <DropdownMenuSub>
-                                <DropdownMenuSubTrigger>
-                                    <Palette className="mr-2 h-4 w-4" /> {t('board.color')}
-                                </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="p-1 grid grid-cols-5 gap-1">
-                                    {CARD_COLORS.map(c => (
-                                        <div
-                                            key={c.name}
-                                            className={cn("w-6 h-6 rounded-sm cursor-pointer border border-transparent hover:border-slate-500", c.class)}
-                                            onClick={() => handleColorChange(c.class)}
-                                            title={t(`colors.${c.name.toLowerCase()}` as any)}
-                                        />
-                                    ))}
-                                </DropdownMenuSubContent>
-                            </DropdownMenuSub>
-                            {canDeleteCard && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
-                                        <Trash2 className="mr-2 h-4 w-4" /> {t('board.delete')}
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                {canEditCard && (
+                    <div className="absolute top-1 right-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity" onPointerDown={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white hover:bg-black/20 rounded-sm">
+                                    <MoreVertical className="h-3.5 w-3.5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                    <Edit2 className="mr-2 h-4 w-4" /> {t('board.edit')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setIsCommentsOpen(!isCommentsOpen)}>
+                                    <MessageSquare className="mr-2 h-4 w-4" /> {isCommentsOpen ? t('board.hide_comments') : t('board.show_comments')}
+                                </DropdownMenuItem>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger>
+                                        <Palette className="mr-2 h-4 w-4" /> {t('board.color')}
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent className="p-1 grid grid-cols-5 gap-1">
+                                        {CARD_COLORS.map(c => (
+                                            <div
+                                                key={c.name}
+                                                className={cn("w-6 h-6 rounded-sm cursor-pointer border border-transparent hover:border-slate-500", c.class)}
+                                                onClick={() => handleColorChange(c.class)}
+                                                title={t(`colors.${c.name.toLowerCase()}` as any)}
+                                            />
+                                        ))}
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                                {canDeleteCard && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
+                                            <Trash2 className="mr-2 h-4 w-4" /> {t('board.delete')}
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
 
                 {isEditing ? (
                     <textarea

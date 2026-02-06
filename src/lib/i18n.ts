@@ -150,6 +150,8 @@ const translations = {
         'board.voting_disabled': 'Voting is disabled',
         'board.sort_order': 'Sort by order',
         'board.sort_votes': 'Sort by votes',
+        'board.locked_admin_msg': 'You can reopen this sprint from the toolbar.',
+        'board.locked_user_msg': 'This retrospective is locked. Thanks for participating!',
         'board.add_button': 'Add',
         'board.search_placeholder': 'Search',
         'board.timer': 'Timer',
@@ -495,6 +497,8 @@ const translations = {
         'board.completed': 'SPRINT TAMAMLANDI',
         'board.complete_sprint': 'Sprinti Tamamla',
         'board.reopen_sprint': 'Sprinti Tekrar Aç',
+        'board.locked_admin_msg': 'Sprinti araç çubuğundan tekrar açabilirsiniz.',
+        'board.locked_user_msg': 'Bu retrospektif kilitlendi. Katılımınız için teşekkürler!',
 
         // Settings / Sidebar
         'settings.board_settings': 'Pano Ayarları',

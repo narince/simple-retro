@@ -427,7 +427,7 @@ export default function BoardPage() {
                             {t('board.completed') || "SPRINT COMPLETED"}
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 text-lg md:text-xl font-medium max-w-md">
-                            {currentUser?.role === 'admin' ? "You can reopen this sprint from the toolbar." : "This retrospective is locked. Thanks for participating!"}
+                            {currentUser?.role === 'admin' ? t('board.locked_admin_msg') : t('board.locked_user_msg')}
                         </p>
                     </div>
                 </div>
@@ -435,26 +435,28 @@ export default function BoardPage() {
 
             {/* HIDE TOOLBAR IN PRESENTATION MODE */}
             {!isPresentationMode && (
-                <BoardToolbar
-                    onAddCard={() => {
-                        setIsAddCardOpen(true);
-                        setSelectedColumnId(undefined);
-                    }}
-                    onAddColumn={() => setIsAddColumnOpen(true)}
-                    onSearch={setSearchQuery}
-                    onSort={setSortBy}
-                    boardTitle={board?.title || "Loading..."}
-                    onUpdateBoardTitle={handleUpdateBoardTitle}
-                    onDeleteBoard={handleDeleteBoard}
-                    boardId={board?.id}
-                    onInvite={() => setIsInviteOpen(true)}
-                    members={memberDetails}
-                    activeUserFilter={activeUserFilter}
-                    onMemberClick={handleMemberClick}
-                    currentUser={currentUser}
-                    isCompleted={board.is_completed}
-                    onToggleComplete={canEditBoard ? handleToggleComplete : undefined}
-                />
+                <div className="relative z-[60]">
+                    <BoardToolbar
+                        onAddCard={() => {
+                            setIsAddCardOpen(true);
+                            setSelectedColumnId(undefined);
+                        }}
+                        onAddColumn={() => setIsAddColumnOpen(true)}
+                        onSearch={setSearchQuery}
+                        onSort={setSortBy}
+                        boardTitle={board?.title || "Loading..."}
+                        onUpdateBoardTitle={handleUpdateBoardTitle}
+                        onDeleteBoard={handleDeleteBoard}
+                        boardId={board?.id}
+                        onInvite={() => setIsInviteOpen(true)}
+                        members={memberDetails}
+                        activeUserFilter={activeUserFilter}
+                        onMemberClick={handleMemberClick}
+                        currentUser={currentUser}
+                        isCompleted={board.is_completed}
+                        onToggleComplete={canEditBoard ? handleToggleComplete : undefined}
+                    />
+                </div>
             )}
 
             <InviteDialog

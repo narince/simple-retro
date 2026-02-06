@@ -47,6 +47,12 @@ const COLUMN_COLORS = [
     { name: "Red", class: "bg-rose-600" },
     { name: "Purple", class: "bg-violet-600" },
     { name: "Yellow", class: "bg-yellow-500" },
+    { name: "Indigo", class: "bg-indigo-600" },
+    { name: "Orange", class: "bg-orange-500" },
+    { name: "Pink", class: "bg-pink-600" },
+    { name: "Cyan", class: "bg-cyan-600" },
+    { name: "Lime", class: "bg-lime-600" },
+    { name: "Emerald", class: "bg-emerald-600" },
 ];
 
 export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteColumn, onUpdateColor, onDeleteCard, canVote = true, onVote, currentUserId, isAdmin, isLocked, members, authorName, onUpdateCard, isOverlay }: ColumnProps) {
