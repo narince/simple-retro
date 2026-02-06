@@ -458,6 +458,22 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                                 <Timer className="h-4 w-4" />
                                 <span>{t('board.timer')}</span>
                             </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            {/* Sprint Completion (Admin Only) */}
+                            {currentUser?.role === 'admin' && (
+                                <DropdownMenuItem
+                                    onClick={() => onToggleComplete?.()}
+                                    className={cn(
+                                        "gap-2 cursor-pointer font-medium",
+                                        isCompleted ? "text-amber-600 focus:text-amber-600" : "text-green-600 focus:text-green-600"
+                                    )}
+                                >
+                                    {isCompleted ? <ArrowUpDown className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                                    <span>{isCompleted ? t('board.reopen_sprint') : t('board.complete_sprint')}</span>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

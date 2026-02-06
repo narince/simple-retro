@@ -364,9 +364,14 @@ export default function DashboardPage() {
 
                                 {view === 'grid' ? (
                                     <>
-                                        <div className="p-6 flex-1 flex flex-col">
+                                        <div className="p-6 flex-1 flex flex-col relative">
+                                            {board.is_completed && (
+                                                <div className="absolute top-0 right-0 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">
+                                                    {t('board.completed')}
+                                                </div>
+                                            )}
                                             <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg line-clamp-2 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={board.title}>
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg line-clamp-2 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors pr-4" title={board.title}>
                                                     {board.title}
                                                 </h3>
                                             </div>

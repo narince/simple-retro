@@ -401,7 +401,8 @@ export default function BoardPage() {
         }
     };
 
-    const isLocked = board?.is_completed;
+    // Locking Logic: Locked if completed AND user is NOT admin
+    const isLocked = board?.is_completed && currentUser?.role !== 'admin';
     const canEditBoard = currentUser?.role === 'admin' || currentUser?.id === board?.owner_id;
 
     const handleAddColumn = async (title: string) => {
@@ -413,11 +414,11 @@ export default function BoardPage() {
     return (
         <div className="flex flex-col h-screen bg-slate-50/50 dark:bg-zinc-950/50 overflow-hidden relative">
 
-            {/* Sprint Completed Overlay */}
+            {/* Sprint Completed Overlay - VISIBLE FOR EVERYONE IF COMPLETED */}
             {board.is_completed && (
-                <div className="absolute inset-0 z-[5] pointer-events-none flex items-center justify-center overflow-hidden">
-                    <div className="transform -rotate-12 bg-black/5 dark:bg-white/5 border-y-4 border-black/10 dark:border-white/10 py-4 px-20 shadow-2xl backdrop-blur-sm select-none">
-                        <h1 className="text-6xl md:text-8xl font-black text-black/20 dark:text-white/20 whitespace-nowrap uppercase tracking-widest">
+                <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-center overflow-hidden">
+                    <div className="transform -rotate-12 bg-red-500/10 dark:bg-red-900/10 border-y-4 border-red-500/20 dark:border-red-500/20 py-4 px-20 shadow-2xl backdrop-blur-[2px] select-none">
+                        <h1 className="text-6xl md:text-8xl font-black text-red-600/40 dark:text-red-500/40 whitespace-nowrap uppercase tracking-widest">
                             {t('board.completed') || "SPRINT COMPLETED"}
                         </h1>
                     </div>
