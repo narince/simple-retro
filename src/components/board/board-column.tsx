@@ -87,7 +87,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
     };
     const handleAddSubmit = () => {
         if (newCardContent.trim()) {
-            onAddCard(id, newCardContent, isAnonymous);
+            onAddCard?.(id, newCardContent, isAnonymous);
             setNewCardContent("");
             setIsAddingCard(true);
             if (addInputRef.current) addInputRef.current.focus();
@@ -321,7 +321,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             comments={card.comments}
                             color={color} // Pass column color to card (or card's own color logic?)
                             votedUserIds={card.voted_user_ids}
-                            onDelete={() => onDeleteCard(card.id)}
+                            onDelete={() => onDeleteCard?.(card.id)}
                             canVote={canVote}
                             onVote={() => onVote?.(card.id)}
                             authorName={card.author_full_name}

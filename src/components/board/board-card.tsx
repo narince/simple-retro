@@ -33,6 +33,9 @@ interface BoardCardProps {
     authorAvatar?: string;
     isAnonymous?: boolean;
     authorId?: string;
+    isLocked?: boolean;
+    onUpdateCard?: (content: string) => void;
+    // Maybe members/mentions later
     currentUserId?: string;
     isAdmin?: boolean;
 }

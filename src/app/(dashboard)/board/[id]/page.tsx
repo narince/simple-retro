@@ -25,6 +25,8 @@ import {
 import { arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { triggerVisualReaction } from '@/lib/reactions';
 import { BoardCard } from '@/components/board/board-card';
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { dataService } from '@/services';
 import { Board, Column, Card } from '@/services/types';
 import { useAppStore } from '@/lib/store';
@@ -390,6 +392,18 @@ export default function BoardPage() {
         return filtered;
     };
 
+    const handleToggleComplete = async () => {
+        if (!board) return;
+        const newStatus = !board.is_completed;
+        const updated = await dataService.updateBoard(board.id, { is_completed: newStatus });
+        if (updated) {
+            setBoard(updated);
+        }
+    };
+
+    const isLocked = board?.is_completed;
+    const canEditBoard = currentUser?.role === 'admin' || currentUser?.id === board?.owner_id;
+
     const handleAddColumn = async (title: string) => {
         if (!board) return;
         const newCol = await dataService.createColumn(board.id, title);
@@ -397,174 +411,172 @@ export default function BoardPage() {
     };
 
     return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-        >
-            <div className="flex flex-col h-full bg-slate-50 dark:bg-zinc-950 min-h-screen">
-                {/* HIDE TOOLBAR IN PRESENTATION MODE */}
-                {!isPresentationMode && (
-                    <BoardToolbar
-                        onAddCard={() => {
-                            setIsAddCardOpen(true);
-                            setSelectedColumnId(undefined);
-                        }}
-                        onAddColumn={() => setIsAddColumnOpen(true)}
-                        onSearch={setSearchQuery}
-                        onSort={setSortBy}
-                        boardTitle={board?.title || "Loading..."}
-                        onUpdateBoardTitle={handleUpdateBoardTitle}
-                        onDeleteBoard={handleDeleteBoard}
-                        boardId={board?.id}
-                        onInvite={() => setIsInviteOpen(true)}
-                        members={memberDetails}
-                        activeUserFilter={activeUserFilter}
-                        onMemberClick={handleMemberClick}
-                        currentUser={currentUser}
-                    />
-                )}
+        <div className="flex flex-col h-screen bg-slate-50/50 dark:bg-zinc-950/50 overflow-hidden relative">
 
-                <InviteDialog
-                    open={isInviteOpen}
-                    onOpenChange={setIsInviteOpen}
-                    boardId={board?.id || ""}
-                    existingMemberIds={board?.allowed_user_ids}
-                    onInvite={(user) => {
-                        setMemberDetails(prev => [...prev, user]);
-                        <div className="flex flex-col h-screen bg-slate-50/50 dark:bg-zinc-950/50 overflow-hidden relative">
+            {/* Sprint Completed Overlay */}
+            {board.is_completed && (
+                <div className="absolute inset-0 z-[5] pointer-events-none flex items-center justify-center overflow-hidden">
+                    <div className="transform -rotate-12 bg-black/5 dark:bg-white/5 border-y-4 border-black/10 dark:border-white/10 py-4 px-20 shadow-2xl backdrop-blur-sm select-none">
+                        <h1 className="text-6xl md:text-8xl font-black text-black/20 dark:text-white/20 whitespace-nowrap uppercase tracking-widest">
+                            {t('board.completed') || "SPRINT COMPLETED"}
+                        </h1>
+                    </div>
+                </div>
+            )}
 
-                            {/* Sprint Completed Overlay */}
-                            {board.is_completed && (
-                                <div className="absolute inset-0 z-[5] pointer-events-none flex items-center justify-center overflow-hidden">
-                                    <div className="transform -rotate-12 bg-black/5 dark:bg-white/5 border-y-4 border-black/10 dark:border-white/10 py-4 px-20 shadow-2xl backdrop-blur-sm select-none">
-                                        <h1 className="text-6xl md:text-8xl font-black text-black/20 dark:text-white/20 whitespace-nowrap uppercase tracking-widest">
-                                            {t('board.completed') || "SPRINT COMPLETED"}
-                                        </h1>
-                                    </div>
-                                </div>
-                            )}
+            {/* HIDE TOOLBAR IN PRESENTATION MODE */}
+            {!isPresentationMode && (
+                <BoardToolbar
+                    onAddCard={() => {
+                        setIsAddCardOpen(true);
+                        setSelectedColumnId(undefined);
+                    }}
+                    onAddColumn={() => setIsAddColumnOpen(true)}
+                    onSearch={setSearchQuery}
+                    onSort={setSortBy}
+                    boardTitle={board?.title || "Loading..."}
+                    onUpdateBoardTitle={handleUpdateBoardTitle}
+                    onDeleteBoard={handleDeleteBoard}
+                    boardId={board?.id}
+                    onInvite={() => setIsInviteOpen(true)}
+                    members={memberDetails}
+                    activeUserFilter={activeUserFilter}
+                    onMemberClick={handleMemberClick}
+                    currentUser={currentUser}
+                    isCompleted={board.is_completed}
+                    onToggleComplete={canEditBoard ? handleToggleComplete : undefined}
+                />
+            )}
 
-                            {/* HIDE TOOLBAR IN PRESENTATION MODE */}
-                            {!isPresentationMode && (
-                                <BoardToolbar
-                                    onAddCard={() => { }} // Handled in column
-                                    onAddColumn={() => setIsAddColumnOpen(true)}
-                                    onSearch={setSearchQuery}
-                                    onSort={setSortBy}
-                                    boardTitle={board?.title || "Loading..."}
-                                    onUpdateBoardTitle={handleUpdateBoardTitle}
-                                    onDeleteBoard={handleDeleteBoard}
-                                    boardId={board?.id}
-                                    onInvite={() => setIsInviteOpen(true)}
+            <InviteDialog
+                open={isInviteOpen}
+                onOpenChange={setIsInviteOpen}
+                boardId={board?.id || ""}
+                existingMemberIds={board?.allowed_user_ids}
+                onInvite={(user) => {
+                    setMemberDetails(prev => [...prev, user]);
+                    if (board) {
+                        setBoard({
+                            ...board,
+                            allowed_user_ids: [...(board.allowed_user_ids || []), user.id]
+                        });
+                    }
+                }}
+            />
+
+            <AddCardDialog
+                open={isAddCardOpen}
+                onOpenChange={setIsAddCardOpen}
+                onSubmit={(content, colId) => handleAddCard(colId, content)}
+                columns={columns.map(c => ({ id: c.id, title: c.title }))}
+                defaultColumnId={selectedColumnId || (columns[0]?.id)}
+            />
+
+            <ConfirmationDialog
+                open={isDeleteColumnOpen}
+                onOpenChange={setIsDeleteColumnOpen}
+                title={t('dialog.delete_column.title')}
+                description={t('dialog.delete_column.description')}
+                onConfirm={handleConfirmDeleteColumn}
+                variant="destructive"
+                confirmText={t('dialog.delete_board.submit')}
+            />
+
+            <ConfirmationDialog
+                open={isDeleteCardOpen}
+                onOpenChange={setIsDeleteCardOpen}
+                title={t('dialog.delete_card.title')}
+                description={t('dialog.delete_card.description')}
+                onConfirm={handleConfirmDeleteCard}
+                variant="destructive"
+                confirmText={t('dialog.delete_board.submit')}
+            />
+
+            <AddColumnDialog
+                open={isAddColumnOpen}
+                onOpenChange={setIsAddColumnOpen}
+                onSubmit={handleAddColumn}
+            />
+
+            <div className={cn("flex-1 p-2 sm:p-6 overflow-x-hidden overflow-y-auto md:overflow-x-auto md:overflow-y-hidden", isPresentationMode && "p-0")}>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCorners}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div className="flex flex-col md:flex-row gap-4 sm:gap-6 h-full pb-4 items-stretch w-full">
+                        <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
+                            {columns.map(col => (
+                                <BoardColumn
+                                    key={col.id}
+                                    column={col}
+                                    cards={getFilteredAndSortedCards(col.id)}
+                                    onAddCard={!isLocked ? handleAddCard : undefined}
+                                    onUpdateTitle={!isLocked ? handleUpdateColumnTitle : undefined}
+                                    onDeleteColumn={!isLocked ? handleDeleteColumnRequest : undefined}
+                                    onUpdateColor={!isLocked ? handleUpdateColumnColor : undefined}
+                                    onDeleteCard={!isLocked ? handleDeleteCardRequest : undefined}
+                                    canVote={!isPresentationMode && canVote && !isLocked}
+                                    onVote={handleVote}
+                                    currentUserId={currentUser?.id}
+                                    isAdmin={currentUser?.role === 'admin' && !isPresentationMode}
+                                    isLocked={isLocked}
                                     members={memberDetails}
-                                    activeUserFilter={activeUserFilter}
-                                    onMemberClick={handleMemberClick}
-                                    currentUser={currentUser}
-                                    isCompleted={board.is_completed}
-                                    onToggleComplete={canEditBoard ? handleToggleComplete : undefined}
+                                // onUpdateCard={!isLocked ? handleUpdateCard : undefined} 
                                 />
-                            )}
+                            ))}
+                        </SortableContext>
 
-                            <InviteDialog
-                                open={isInviteOpen}
-                                onOpenChange={setIsInviteOpen}
-                                boardId={board?.id || ""}
-                                existingMemberIds={board?.allowed_user_ids}
-                                onInvite={(user) => {
-                                    setMemberDetails(prev => [...prev, user]);
-                                    if (board) {
-                                        setBoard({
-                                            ...board,
-                                            allowed_user_ids: [...(board.allowed_user_ids || []), user.id]
-                                        });
-                                    }
-                                }}
-                            />
-
-                            <AddCardDialog
-                                open={isAddCardOpen}
-                                onOpenChange={setIsAddCardOpen}
-                                onSubmit={(content, colId) => handleAddCard(colId, content)}
-                                columns={columns.map(c => ({ id: c.id, title: c.title }))}
-                                defaultColumnId={selectedColumnId || (columns[0]?.id)}
-                            />
-
-                            <ConfirmationDialog
-                                open={isDeleteColumnOpen}
-                                onOpenChange={setIsDeleteColumnOpen}
-                                title={t('dialog.delete_column.title')}
-                                description={t('dialog.delete_column.description')}
-                                onConfirm={handleConfirmDeleteColumn}
-                                variant="destructive"
-                                confirmText={t('dialog.delete_board.submit')}
-                            />
-
-                            <ConfirmationDialog
-                                open={isDeleteCardOpen}
-                                onOpenChange={setIsDeleteCardOpen}
-                                title={t('dialog.delete_card.title')}
-                                description={t('dialog.delete_card.description')}
-                                onConfirm={handleConfirmDeleteCard}
-                                variant="destructive"
-                                confirmText={t('dialog.delete_board.submit')}
-                            />
-
-                            <AddColumnDialog
-                                open={isAddColumnOpen}
-                                onOpenChange={setIsAddColumnOpen}
-                                onSubmit={handleAddColumn}
-                            />
-
-                            <div className={cn("flex-1 p-2 sm:p-6 overflow-x-hidden overflow-y-auto md:overflow-x-auto md:overflow-y-hidden", isPresentationMode && "p-0")}>
-                                <DndContext
-                                    sensors={sensors}
-                                    collisionDetection={closestCorners}
-                                    onDragStart={handleDragStart}
-                                    onDragOver={handleDragOver}
-                                    onDragEnd={handleDragEnd}
+                        {!isLocked && (
+                            <div className="w-80 shrink-0">
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-12 border-dashed border-2 hover:border-solid bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-900"
+                                    onClick={() => setIsAddColumnOpen(true)}
                                 >
-                                    <div className="flex flex-col md:flex-row gap-4 sm:gap-6 h-full pb-4 items-stretch w-full">
-                                        <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
-                                            {columns.map(col => (
-                                                <BoardColumn
-                                                    key={col.id}
-                                                    column={col}
-                                                    cards={getFilteredAndSortedCards(col.id)}
-                                                    onAddCard={!isLocked ? handleAddCard : undefined}
-                                                    onUpdateTitle={!isLocked ? handleUpdateColumnTitle : undefined}
-                                                    onDeleteColumn={!isLocked ? handleDeleteColumnRequest : undefined}
-                                                    onUpdateColor={!isLocked ? handleUpdateColumnColor : undefined}
-                                                    onDeleteCard={!isLocked ? handleDeleteCardRequest : undefined}
-                                                    canVote={!isPresentationMode && canVote && !isLocked} // Disable voting in presentation and if locked
-                                                    onVote={handleVote}
-                                                    currentUserId={currentUser?.id}
-                                                    isAdmin={currentUser?.role === 'admin' && !isPresentationMode} // Hide admin controls in presentation
-                                                    isLocked={isLocked} // Pass locked state to column/card
-                                                    members={memberDetails}
-                                                // Assuming handleUpdateCard is defined elsewhere or will be added
-                                                // onUpdateCard={!isLocked ? handleUpdateCard : undefined} 
-                                                />
-                                            ))}
-                                        </SortableContext>
-                                        <ReactionOverlay />
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    {t('board.add_column')}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                    <DragOverlay>
+                        {activeCardData ? (
+                            <BoardCard
+                                id={activeCardData.id}
+                                content={activeCardData.content}
+                                votes={activeCardData.votes}
+                                comments={activeCardData.comments}
+                                color={columns.find(c => c.id === activeCardData.column_id)?.color || ''}
+                                votedUserIds={activeCardData.voted_user_ids}
+                                authorName={activeCardData.author_full_name}
+                                authorAvatar={activeCardData.author_avatar_url}
+                                isAnonymous={activeCardData.isAnonymous}
+                                isLocked={isLocked}
+                                onDelete={() => { }}
+                            />
+                        ) : null}
+                    </DragOverlay>
+                </DndContext>
+            </div>
 
-                                        {/* Exit Presentation Mode Button */}
-                                        {isPresentationMode && (
-                                            <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4">
-                                                <button
-                                                    onClick={() => setIsPresentationMode(false)}
-                                                    className="bg-slate-900/80 hover:bg-slate-800 text-white px-6 py-3 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-2 font-medium border border-white/20 transition-all hover:scale-105"
-                                                >
-                                                    <span className="text-xl">✕</span>
-                                                    {t('settings.exit_presentation') || "Exit Presentation"}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </DndContext >
-                                );
+            <ReactionOverlay />
+
+            {/* Exit Presentation Mode Button */}
+            {isPresentationMode && (
+                <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-4">
+                    <button
+                        onClick={() => setIsPresentationMode(false)}
+                        className="bg-slate-900/80 hover:bg-slate-800 text-white px-6 py-3 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-2 font-medium border border-white/20 transition-all hover:scale-105"
+                    >
+                        <span className="text-xl">✕</span>
+                        {t('settings.exit_presentation') || "Exit Presentation"}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 }
 

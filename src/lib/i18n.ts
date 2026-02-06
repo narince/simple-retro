@@ -492,6 +492,9 @@ const translations = {
         'board.invite': 'Davet Et',
         'board.anonymous': 'Anonim',
         'board.post_anonymously': 'Anonim Gönder',
+        'board.completed': 'SPRINT TAMAMLANDI',
+        'board.complete_sprint': 'Sprinti Tamamla',
+        'board.reopen_sprint': 'Sprinti Tekrar Aç',
 
         // Settings / Sidebar
         'settings.board_settings': 'Pano Ayarları',
