@@ -493,7 +493,8 @@ export class PostgresService implements IDataService {
             are_votes_hidden: row.are_votes_hidden,
             is_locked: row.is_locked,
             is_archived: row.is_archived,
-            are_cards_hidden: row.are_cards_hidden,
+            is_completed: row.is_completed,
+            are_cards_hidden: row.are_cards_hidden, // Map newly added column
             is_voting_disabled: row.is_voting_disabled,
             is_gifs_enabled: row.is_gifs_enabled,
             is_reactions_enabled: row.is_reactions_enabled,

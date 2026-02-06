@@ -29,6 +29,7 @@ export interface Board {
     max_votes?: number;
     max_votes_scope?: 'board' | 'column'; // 'board' or 'column'
     is_archived?: boolean;
+    is_completed?: boolean;
     column_colors?: string[]; // For dashboard preview
     created_at: string;
     allowed_user_ids?: string[]; // IDs of users who can access this board

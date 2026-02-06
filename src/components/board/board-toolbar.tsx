@@ -13,7 +13,9 @@ import {
     Star,
     Hand,
     Sparkles,
-    ChevronDown
+    ChevronDown,
+    Trash2,
+    Check
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -47,9 +49,11 @@ interface BoardToolbarProps {
     activeUserFilter?: string | null;
     onMemberClick?: (userId: string) => void;
     currentUser?: any; // Ideally User type
+    isCompleted?: boolean;
+    onToggleComplete?: () => void;
 }
 
-export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTitle, onUpdateBoardTitle, onDeleteBoard, boardId, onInvite, members, activeUserFilter, onMemberClick, currentUser }: BoardToolbarProps) {
+export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTitle, onUpdateBoardTitle, onDeleteBoard, boardId, onInvite, members, activeUserFilter, onMemberClick, currentUser, isCompleted, onToggleComplete }: BoardToolbarProps) {
     const { isContentBlur, setIsContentBlur } = useAppStore();
     const { t } = useTranslation();
     const [titleInput, setTitleInput] = useState(boardTitle);
