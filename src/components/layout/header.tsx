@@ -59,7 +59,7 @@ export function Header() {
 
     if (!mounted) {
         return (
-            <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md border-slate-200 dark:border-slate-800 dark:bg-zinc-950/80">
+            <header className="sticky top-0 z-[70] w-full border-b bg-white/80 backdrop-blur-md border-slate-200 dark:border-slate-800 dark:bg-zinc-950/80">
                 <div className="flex h-16 items-center justify-between px-6 w-full">
                     {/* Left: Logo */}
                     <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export function Header() {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md border-slate-200 dark:border-slate-800 dark:bg-zinc-950/80">
+        <header className="sticky top-0 z-[70] w-full border-b bg-white/80 backdrop-blur-md border-slate-200 dark:border-slate-800 dark:bg-zinc-950/80">
             <div className="flex h-16 items-center justify-between px-6 w-full">
                 {/* Left: Logo */}
                 <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function Header() {
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuContent className="w-56 z-[100]" align="end" forceMount>
                                     <DropdownMenuItem className="font-medium mb-1">{user.full_name}</DropdownMenuItem>
                                     {user.role === 'admin' && (
                                         <DropdownMenuItem onClick={() => router.push('/admin/users')}>
