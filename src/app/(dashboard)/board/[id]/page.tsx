@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { Lock } from 'lucide-react';
 import { BoardToolbar } from '@/components/board/board-toolbar';
 import { BoardColumn } from '@/components/board/board-column';
 import { AddCardDialog } from '@/components/board/add-card-dialog';
@@ -415,12 +416,19 @@ export default function BoardPage() {
         <div className="flex flex-col h-screen bg-slate-50/50 dark:bg-zinc-950/50 overflow-hidden relative">
 
             {/* Sprint Completed Overlay - VISIBLE FOR EVERYONE IF COMPLETED */}
+            {/* Sprint Completed Overlay - VISIBLE FOR EVERYONE IF COMPLETED */}
             {board.is_completed && (
-                <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-center overflow-hidden">
-                    <div className="transform -rotate-12 bg-red-500/10 dark:bg-red-900/10 border-y-4 border-red-500/20 dark:border-red-500/20 py-4 px-20 shadow-2xl backdrop-blur-[2px] select-none">
-                        <h1 className="text-6xl md:text-8xl font-black text-red-600/40 dark:text-red-500/40 whitespace-nowrap uppercase tracking-widest">
+                <div className="absolute inset-0 z-[50] flex items-center justify-center overflow-hidden bg-slate-50/60 dark:bg-zinc-950/80 backdrop-blur-sm transition-all duration-500 animate-in fade-in">
+                    <div className="flex flex-col items-center justify-center p-12 text-center pointer-events-auto">
+                        <div className="h-20 w-20 bg-slate-900 dark:bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-bounce">
+                            <Lock className="h-10 w-10 text-white dark:text-slate-900" />
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-2 drop-shadow-sm">
                             {t('board.completed') || "SPRINT COMPLETED"}
                         </h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-lg md:text-xl font-medium max-w-md">
+                            {currentUser?.role === 'admin' ? "You can reopen this sprint from the toolbar." : "This retrospective is locked. Thanks for participating!"}
+                        </p>
                     </div>
                 </div>
             )}
@@ -529,19 +537,6 @@ export default function BoardPage() {
                                 />
                             ))}
                         </SortableContext>
-
-                        {!isLocked && (
-                            <div className="w-80 shrink-0">
-                                <Button
-                                    variant="outline"
-                                    className="w-full h-12 border-dashed border-2 hover:border-solid bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-900"
-                                    onClick={() => setIsAddColumnOpen(true)}
-                                >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    {t('board.add_column')}
-                                </Button>
-                            </div>
-                        )}
                     </div>
                     <DragOverlay>
                         {activeCardData ? (

@@ -343,6 +343,21 @@ export function BoardToolbar({ onAddCard, onAddColumn, onSearch, onSort, boardTi
                     </div>
                 </div>
 
+                {/* Complete Sprint Button (Admin Only) - MAIN TOOLBAR */}
+                {currentUser?.role === 'admin' && (
+                    <Button
+                        variant={isCompleted ? "outline" : "outline"}
+                        className={cn(
+                            "h-9 px-3 mr-2 hidden md:flex items-center gap-2 border-dashed border-2",
+                            isCompleted ? "border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20" : "border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                        )}
+                        onClick={onToggleComplete}
+                    >
+                        {isCompleted ? <ArrowUpDown className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                        <span className="font-bold">{isCompleted ? t('board.reopen_sprint') : t('board.complete_sprint')}</span>
+                    </Button>
+                )}
+
                 {/* Add Button */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
