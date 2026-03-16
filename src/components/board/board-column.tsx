@@ -339,7 +339,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             />
                             {/* Mention dropdown */}
                             {mentionQuery !== null && filteredMembers.length > 0 && (
-                                <div className="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-xl z-[200] overflow-hidden">
                                     <div className="px-2 pt-1.5 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
                                         Üyeler
                                     </div>
