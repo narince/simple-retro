@@ -406,7 +406,6 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                             </Button>
                         </div>
                     </div>
-                </div>
             </Card>
 
         </div>
