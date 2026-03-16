@@ -427,7 +427,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
             {/* Cards Area */}
             <div
                 ref={setRefs}
-                className="flex-1 p-1 space-y-2 bg-transparent min-h-[100px]"
+                className="flex-1 p-1 space-y-2 bg-transparent min-h-[100px] overflow-y-auto"
             >
                 <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
                     {cards.map((card) => (
