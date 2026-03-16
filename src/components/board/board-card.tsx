@@ -35,9 +35,9 @@ interface BoardCardProps {
     authorId?: string;
     isLocked?: boolean;
     onUpdateCard?: (content: string) => void;
-    // Maybe members/mentions later
     currentUserId?: string;
     isAdmin?: boolean;
+    members?: any[];
 }
 
 const CARD_COLORS = [
@@ -53,7 +53,7 @@ const CARD_COLORS = [
     { name: "Cyan", class: "bg-cyan-600" },
 ];
 
-export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous, authorId, currentUserId, isAdmin, isLocked }: BoardCardProps) {
+export function BoardCard({ id, content: initialContent, votes: initialVotes, comments: initialComments, color: initialColor, votedUserIds = [], onDelete, canVote = true, onVote, authorName, authorAvatar, isAnonymous, authorId, currentUserId, isAdmin, isLocked, members = [] }: BoardCardProps) {
     const { isContentBlur, disableVoting } = useAppStore();
     const { t } = useTranslation();
 
@@ -189,6 +189,45 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
     // User for comments
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isCommentAnonymous, setIsCommentAnonymous] = useState(false);
+    const commentInputRef = useRef<HTMLInputElement>(null);
+
+    // Mention state for comment input
+    const [commentMentionQuery, setCommentMentionQuery] = useState<string | null>(null);
+    const [commentMentionAtIndex, setCommentMentionAtIndex] = useState(0);
+    const [commentMentionHighlight, setCommentMentionHighlight] = useState(0);
+
+    const filteredMentionMembers = commentMentionQuery !== null
+        ? (members || []).filter(m => {
+            const name = (m.full_name || m.email || '').toLowerCase();
+            return name.includes(commentMentionQuery.toLowerCase());
+          }).slice(0, 6)
+        : [];
+
+    const detectMentionAt = (text: string, cursorPos: number) => {
+        const before = text.slice(0, cursorPos);
+        const atIdx = before.lastIndexOf('@');
+        if (atIdx === -1) return null;
+        const query = before.slice(atIdx + 1);
+        if (query.includes(' ') || query.includes('\n')) return null;
+        return { query, atIdx };
+    };
+
+    const handleCommentMentionSelect = (member: any) => {
+        const name = member.full_name || member.email?.split('@')[0] || 'User';
+        const before = newComment.slice(0, commentMentionAtIndex);
+        const after = newComment.slice(commentMentionAtIndex + 1 + (commentMentionQuery?.length ?? 0));
+        const newVal = `${before}@${name} ${after}`;
+        setNewComment(newVal);
+        setCommentMentionQuery(null);
+        setCommentMentionHighlight(0);
+        setTimeout(() => {
+            if (commentInputRef.current) {
+                const pos = (before + '@' + name + ' ').length;
+                commentInputRef.current.focus();
+                commentInputRef.current.setSelectionRange(pos, pos);
+            }
+        }, 0);
+    };
 
     useEffect(() => {
         dataService.getCurrentUser().then(setCurrentUser);
@@ -293,7 +332,11 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                         "text-sm font-medium mb-auto pr-4 break-words leading-snug whitespace-pre-wrap",
                         isContentBlur && "blur-[2px] select-none opacity-60"
                     )}>
-                        {content}
+                        {content.split(/(@\S+)/g).map((part, i) =>
+                            part.startsWith('@') ? (
+                                <span key={i} className="font-bold text-white underline underline-offset-2 decoration-white/50">{part}</span>
+                            ) : part
+                        )}
                     </p>
                 )}
 
@@ -371,14 +414,74 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                 );
                             })}
                         </div>
-                        <div className="flex items-center gap-2">
-                            <input
-                                className="flex-1 bg-black/10 text-white placeholder-white/50 text-xs px-2 py-1.5 rounded-sm focus:outline-none focus:bg-black/20"
-                                placeholder={t('board.write_comment')}
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                            />
+                        <div className="flex items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
+                            <div className="relative flex-1">
+                                <input
+                                    ref={commentInputRef}
+                                    className="w-full bg-black/10 text-white placeholder-white/50 text-xs px-2 py-1.5 rounded-sm focus:outline-none focus:bg-black/20"
+                                    placeholder={t('board.write_comment')}
+                                    value={newComment}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setNewComment(val);
+                                        const cursor = e.target.selectionStart ?? val.length;
+                                        const result = detectMentionAt(val, cursor);
+                                        if (result) {
+                                            setCommentMentionQuery(result.query);
+                                            setCommentMentionAtIndex(result.atIdx);
+                                            setCommentMentionHighlight(0);
+                                        } else {
+                                            setCommentMentionQuery(null);
+                                        }
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (commentMentionQuery !== null && filteredMentionMembers.length > 0) {
+                                            if (e.key === 'ArrowDown') { e.preventDefault(); setCommentMentionHighlight(h => Math.min(h + 1, filteredMentionMembers.length - 1)); return; }
+                                            if (e.key === 'ArrowUp') { e.preventDefault(); setCommentMentionHighlight(h => Math.max(h - 1, 0)); return; }
+                                            if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); handleCommentMentionSelect(filteredMentionMembers[commentMentionHighlight]); return; }
+                                            if (e.key === 'Escape') { setCommentMentionQuery(null); return; }
+                                        }
+                                        if (e.key === 'Enter') handleAddComment();
+                                    }}
+                                />
+                                {/* Comment mention dropdown */}
+                                {commentMentionQuery !== null && filteredMentionMembers.length > 0 && (
+                                    <div className="absolute bottom-full left-0 mb-1 w-52 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                        <div className="px-2 pt-1.5 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
+                                            Üyeler
+                                        </div>
+                                        {filteredMentionMembers.map((m, i) => {
+                                            const name = m.full_name || m.email?.split('@')[0] || 'User';
+                                            const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+                                            return (
+                                                <button
+                                                    key={m.id}
+                                                    type="button"
+                                                    className={cn(
+                                                        "w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left transition-colors",
+                                                        i === commentMentionHighlight
+                                                            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                                                    )}
+                                                    onMouseDown={(e) => { e.preventDefault(); handleCommentMentionSelect(m); }}
+                                                    onMouseEnter={() => setCommentMentionHighlight(i)}
+                                                >
+                                                    {m.avatar_url ? (
+                                                        <img src={m.avatar_url} className="w-5 h-5 rounded-full object-cover shrink-0" alt={name} />
+                                                    ) : (
+                                                        <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-[9px] font-bold flex items-center justify-center shrink-0">
+                                                            {initials}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="font-medium truncate">{name}</span>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
 
                             <button
                                 type="button"

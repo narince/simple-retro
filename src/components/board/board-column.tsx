@@ -74,6 +74,45 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
     const [isAnonymous, setIsAnonymous] = useState(false);
     const addInputRef = useRef<HTMLTextAreaElement>(null);
 
+    // Mention state
+    const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+    const [mentionAtIndex, setMentionAtIndex] = useState(0);
+    const [mentionHighlight, setMentionHighlight] = useState(0);
+
+    const filteredMembers = mentionQuery !== null
+        ? (members || []).filter(m => {
+            const name = (m.full_name || m.email || '').toLowerCase();
+            return name.includes(mentionQuery.toLowerCase());
+          }).slice(0, 6)
+        : [];
+
+    const detectMentionAt = (text: string, cursorPos: number) => {
+        const before = text.slice(0, cursorPos);
+        const atIdx = before.lastIndexOf('@');
+        if (atIdx === -1) return null;
+        const query = before.slice(atIdx + 1);
+        if (query.includes(' ') || query.includes('\n')) return null;
+        return { query, atIdx };
+    };
+
+    const handleMentionSelect = (member: any) => {
+        const name = member.full_name || member.email?.split('@')[0] || 'User';
+        const cursorPos = addInputRef.current?.selectionStart ?? newCardContent.length;
+        const before = newCardContent.slice(0, mentionAtIndex);
+        const after = newCardContent.slice(mentionAtIndex + 1 + (mentionQuery?.length ?? 0));
+        const newVal = `${before}@${name} ${after}`;
+        setNewCardContent(newVal);
+        setMentionQuery(null);
+        setMentionHighlight(0);
+        setTimeout(() => {
+            if (addInputRef.current) {
+                const pos = (before + '@' + name + ' ').length;
+                addInputRef.current.focus();
+                addInputRef.current.setSelectionRange(pos, pos);
+            }
+        }, 0);
+    };
+
     useEffect(() => {
         if (isAddingCard && addInputRef.current) {
             addInputRef.current.focus();
@@ -104,6 +143,27 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (mentionQuery !== null && filteredMembers.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setMentionHighlight(h => Math.min(h + 1, filteredMembers.length - 1));
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setMentionHighlight(h => Math.max(h - 1, 0));
+                return;
+            }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                handleMentionSelect(filteredMembers[mentionHighlight]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                setMentionQuery(null);
+                return;
+            }
+        }
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleAddSubmit();
@@ -255,15 +315,67 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             }
                         }}
                     >
-                        <textarea
-                            ref={addInputRef}
-                            className="w-full text-sm p-2 rounded-sm border-0 focus:ring-0 min-h-[60px] text-slate-800 dark:text-slate-200 placeholder-slate-400 bg-transparent resize-none leading-snug focus-visible:outline-none"
-                            placeholder={t('board.card_placeholder')}
-                            value={newCardContent}
-                            onChange={(e) => setNewCardContent(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            autoFocus // Ensure it grabs focus so onBlur works
-                        />
+                        <div className="relative">
+                            <textarea
+                                ref={addInputRef}
+                                className="w-full text-sm p-2 rounded-sm border-0 focus:ring-0 min-h-[60px] text-slate-800 dark:text-slate-200 placeholder-slate-400 bg-transparent resize-none leading-snug focus-visible:outline-none"
+                                placeholder={t('board.card_placeholder')}
+                                value={newCardContent}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setNewCardContent(val);
+                                    const cursor = e.target.selectionStart ?? val.length;
+                                    const result = detectMentionAt(val, cursor);
+                                    if (result) {
+                                        setMentionQuery(result.query);
+                                        setMentionAtIndex(result.atIdx);
+                                        setMentionHighlight(0);
+                                    } else {
+                                        setMentionQuery(null);
+                                    }
+                                }}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                            />
+                            {/* Mention dropdown */}
+                            {mentionQuery !== null && filteredMembers.length > 0 && (
+                                <div className="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                    <div className="px-2 pt-1.5 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-zinc-800">
+                                        Üyeler
+                                    </div>
+                                    {filteredMembers.map((m, i) => {
+                                        const name = m.full_name || m.email?.split('@')[0] || 'User';
+                                        const initials = name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+                                        return (
+                                            <button
+                                                key={m.id}
+                                                type="button"
+                                                className={cn(
+                                                    "w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors",
+                                                    i === mentionHighlight
+                                                        ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800"
+                                                )}
+                                                onMouseDown={(e) => { e.preventDefault(); handleMentionSelect(m); }}
+                                                onMouseEnter={() => setMentionHighlight(i)}
+                                            >
+                                                {m.avatar_url ? (
+                                                    <img src={m.avatar_url} className="w-6 h-6 rounded-full object-cover shrink-0" alt={name} />
+                                                ) : (
+                                                    <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-[10px] font-bold flex items-center justify-center shrink-0">
+                                                        {initials}
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="font-medium truncate">{name}</span>
+                                                    {m.email && <span className="text-[10px] text-slate-400 truncate">{m.email}</span>}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
                         <div className="flex justify-between items-center gap-2 mt-1 border-t pt-1 border-slate-100 dark:border-slate-800">
                             <button
                                 type="button" // Prevent form submission behaviors if any
@@ -325,7 +437,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             content={card.content}
                             votes={card.votes}
                             comments={card.comments}
-                            color={color} // Pass column color to card (or card's own color logic?)
+                            color={color}
                             votedUserIds={card.voted_user_ids}
                             onDelete={() => onDeleteCard?.(card.id)}
                             canVote={canVote}
@@ -336,6 +448,7 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             authorId={card.author_id}
                             currentUserId={currentUserId}
                             isAdmin={isAdmin}
+                            members={members}
                         />
                     ))}
                 </SortableContext>
