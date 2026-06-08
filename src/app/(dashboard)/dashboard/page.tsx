@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 candidate = `${rootTitle} (${currentSuffix}) ${nextNum}`;
             }
 
-            const newBoard = await dataService.cloneBoard(boardAction.id, candidate);
+            const newBoard = await dataService.cloneBoard(boardAction.id, candidate, user?.id);
             setBoards(prev => [newBoard, ...prev]);
         } catch (error) {
             console.error("Failed to clone board", error);

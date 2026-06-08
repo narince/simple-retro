@@ -147,9 +147,10 @@ export class PostgresService implements IDataService {
 
     async createBoard(title: string, teamId: string, options?: any): Promise<Board> {
         const id = crypto.randomUUID();
+        const allowedUsers = Array.from(new Set([teamId, ...(options?.allowedUserIds || [])]));
         const res = await pool.query(
-            'INSERT INTO boards (id, team_id, title, max_votes, column_colors, allowed_user_ids, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
-            [id, teamId, title, options?.maxVotes || 5, [], options?.allowedUserIds || []]
+            'INSERT INTO boards (id, team_id, owner_id, created_by, title, max_votes, column_colors, allowed_user_ids, created_at) VALUES ($1, $2, $2, $2, $3, $4, $5, $6, NOW()) RETURNING *',
+            [id, teamId, title, options?.maxVotes || 5, [], allowedUsers]
         );
 
         // Initial columns?
@@ -203,7 +204,7 @@ export class PostgresService implements IDataService {
         // Cards/Comments also need cleanup if no cascade
     }
 
-    async cloneBoard(boardId: string, newTitle?: string): Promise<Board> {
+    async cloneBoard(boardId: string, newTitle?: string, clonerId?: string): Promise<Board> {
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
@@ -216,14 +217,19 @@ export class PostgresService implements IDataService {
             // 2. Create new board
             const newBoardId = crypto.randomUUID();
             const title = newTitle || `${originalBoard.title} (Clone)`;
+            const cloner = clonerId || originalBoard.team_id;
+            const allowedUsers = clonerId ? [clonerId] : (originalBoard.allowed_user_ids || []);
+            const owner = clonerId || originalBoard.owner_id || originalBoard.team_id;
+            const creator = clonerId || originalBoard.created_by || originalBoard.team_id;
+
             const newBoardRes = await client.query(
                 `INSERT INTO boards (
-                    id, team_id, title, max_votes, column_colors, allowed_user_ids, 
+                    id, team_id, owner_id, created_by, title, max_votes, column_colors, allowed_user_ids, 
                     is_locked, are_votes_hidden, are_cards_hidden, is_voting_disabled,
                     is_gifs_enabled, is_reactions_enabled, is_comments_enabled, created_at
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW()) RETURNING *`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()) RETURNING *`,
                 [
-                    newBoardId, originalBoard.team_id, title, originalBoard.max_votes, originalBoard.column_colors, originalBoard.allowed_user_ids,
+                    newBoardId, cloner, owner, creator, title, originalBoard.max_votes, originalBoard.column_colors, allowedUsers,
                     false, originalBoard.are_votes_hidden, originalBoard.are_cards_hidden, false,
                     originalBoard.is_gifs_enabled, originalBoard.is_reactions_enabled, originalBoard.is_comments_enabled
                 ]
@@ -279,7 +285,7 @@ export class PostgresService implements IDataService {
     async inviteUserToBoard(boardId: string, userId: string): Promise<void> {
         // Append to allowed_user_ids array
         await pool.query(
-            'UPDATE boards SET allowed_user_ids = array_append(allowed_user_ids, $1) WHERE id = $2',
+            'UPDATE boards SET allowed_user_ids = array_append(COALESCE(allowed_user_ids, \'{}\'::text[]), $1) WHERE id = $2 AND NOT ($1 = ANY(COALESCE(allowed_user_ids, \'{}\'::text[])))',
             [userId, boardId]
         );
     }

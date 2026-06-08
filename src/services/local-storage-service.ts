@@ -248,7 +248,7 @@ export class LocalStorageService implements IDataService {
         return null;
     }
 
-    async cloneBoard(boardId: string, newTitle?: string): Promise<Board> {
+    async cloneBoard(boardId: string, newTitle?: string, clonerId?: string): Promise<Board> {
         const board = await this.getBoard(boardId);
         if (!board) throw new Error("Board not found");
 

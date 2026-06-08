@@ -193,11 +193,11 @@ export class ApiService implements IDataService {
         await fetch(`${API_BASE}/boards/${boardId}`, { method: 'DELETE' });
     }
 
-    async cloneBoard(boardId: string, newTitle?: string): Promise<Board> {
+    async cloneBoard(boardId: string, newTitle?: string, clonerId?: string): Promise<Board> {
         const res = await fetch(`${API_BASE}/boards/${boardId}/clone`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newTitle })
+            body: JSON.stringify({ newTitle, clonerId })
         });
         if (!res.ok) throw new Error("Failed to clone board");
         return res.json();

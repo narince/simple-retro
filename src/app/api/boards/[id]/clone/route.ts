@@ -5,12 +5,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const params = await props.params;
     try {
         const body = await request.json();
-        const { title } = body;
+        const { newTitle, title, clonerId } = body;
+        const titleToUse = newTitle || title;
 
-        // Note: PostgresService.cloneBoard must be implemented or we handle logic here.
-        // Assuming serverDataService has cloneBoard or we use createBoard as a simple clone.
-
-        const newBoard = await serverDataService.cloneBoard(params.id, title);
+        const newBoard = await serverDataService.cloneBoard(params.id, titleToUse, clonerId);
         return NextResponse.json(newBoard);
 
     } catch (error) {

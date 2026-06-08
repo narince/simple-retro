@@ -435,6 +435,7 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                         }
                                     }}
                                     onKeyDown={(e) => {
+                                        e.stopPropagation(); // Prevent dnd-kit keyboard sensor from intercepting space/enter
                                         if (commentMentionQuery !== null && filteredMentionMembers.length > 0) {
                                             if (e.key === 'ArrowDown') { e.preventDefault(); setCommentMentionHighlight(h => Math.min(h + 1, filteredMentionMembers.length - 1)); return; }
                                             if (e.key === 'ArrowUp') { e.preventDefault(); setCommentMentionHighlight(h => Math.max(h - 1, 0)); return; }
@@ -442,6 +443,9 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                             if (e.key === 'Escape') { setCommentMentionQuery(null); return; }
                                         }
                                         if (e.key === 'Enter') handleAddComment();
+                                    }}
+                                    onKeyUp={(e) => {
+                                        e.stopPropagation(); // Prevent dnd-kit keyboard sensor from intercepting keyup
                                     }}
                                 />
                                 {/* Comment mention dropdown */}

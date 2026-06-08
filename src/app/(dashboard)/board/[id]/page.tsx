@@ -92,6 +92,22 @@ export default function BoardPage() {
             }
 
             setBoard(loadedBoard);
+
+            // Auto-join shared board if we are logged in and not the owner/creator
+            if (currentUser && currentUser.id !== 'anon' && loadedBoard.owner_id !== currentUser.id) {
+                const isAlreadyInvited = loadedBoard.allowed_user_ids?.includes(currentUser.id);
+                if (!isAlreadyInvited) {
+                    await dataService.inviteUserToBoard(boardId, currentUser.id);
+                    if (loadedBoard.allowed_user_ids) {
+                        if (!loadedBoard.allowed_user_ids.includes(currentUser.id)) {
+                            loadedBoard.allowed_user_ids.push(currentUser.id);
+                        }
+                    } else {
+                        loadedBoard.allowed_user_ids = [currentUser.id];
+                    }
+                }
+            }
+
             const loadedCols = await dataService.getColumns(boardId);
             setColumns(loadedCols);
 

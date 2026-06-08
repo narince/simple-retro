@@ -15,7 +15,7 @@ export interface IDataService {
     getBoard(boardId: string): Promise<Board | null>;
     updateBoard(boardId: string, updates: Partial<Board>): Promise<Board | null>;
     deleteBoard(boardId: string): Promise<void>;
-    cloneBoard(boardId: string, newTitle?: string): Promise<Board>;
+    cloneBoard(boardId: string, newTitle?: string, clonerId?: string): Promise<Board>;
 
     // Columns & Cards
     // Cards
