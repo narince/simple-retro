@@ -169,6 +169,7 @@ export class ApiService implements IDataService {
         const currentUser = await this.getCurrentUser();
         const res = await fetch(`${API_BASE}/boards`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, teamId, options, creatorId: currentUser?.id })
         });
         return res.json();
@@ -222,6 +223,7 @@ export class ApiService implements IDataService {
     async createColumn(boardId: string, title: string): Promise<Column> {
         const res = await fetch(`${API_BASE}/columns`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ boardId, title })
         });
         return res.json();
@@ -230,6 +232,7 @@ export class ApiService implements IDataService {
     async updateColumn(columnId: string, title: string): Promise<Column | null> {
         const res = await fetch(`${API_BASE}/columns/${columnId}`, { // Need route
             method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title })
         });
         return res.json();
@@ -239,7 +242,11 @@ export class ApiService implements IDataService {
         await fetch(`${API_BASE}/columns/${columnId}`, { method: 'DELETE' });
     }
     async updateColumnColor(id: string, color: string): Promise<void> {
-        await fetch(`${API_BASE}/columns/${id}`, { method: 'PATCH', body: JSON.stringify({ color }) });
+        await fetch(`${API_BASE}/columns/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ color })
+        });
     }
 
 
@@ -252,6 +259,7 @@ export class ApiService implements IDataService {
     async createCard(columnId: string, content: string, authorId: string, options?: any): Promise<Card> {
         const res = await fetch(`${API_BASE}/cards`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ columnId, content, authorId, options })
         });
         return res.json();
@@ -260,6 +268,7 @@ export class ApiService implements IDataService {
     async updateCard(cardId: string, content: string): Promise<Card | null> {
         const res = await fetch(`${API_BASE}/cards/${cardId}`, {
             method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ content })
         });
         return res.json();
@@ -271,16 +280,25 @@ export class ApiService implements IDataService {
 
     async voteCard(cardId: string, userId: string): Promise<void> {
         // Need dedicated vote endpoint or PATCH
-        await fetch(`${API_BASE}/cards/${cardId}/vote`, { method: 'POST', body: JSON.stringify({ userId }) });
+        await fetch(`${API_BASE}/cards/${cardId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
     }
 
     async updateCardColor(cardId: string, color: string): Promise<void> {
-        await fetch(`${API_BASE}/cards/${cardId}`, { method: 'PATCH', body: JSON.stringify({ color }) });
+        await fetch(`${API_BASE}/cards/${cardId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ color })
+        });
     }
 
     async addComment(cardId: string, text: string, authorId: string, options?: { isAnonymous?: boolean, authorName?: string, authorAvatar?: string }): Promise<void> {
         await fetch(`${API_BASE}/cards/${cardId}/comments`, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 text,
                 authorId,
@@ -293,7 +311,11 @@ export class ApiService implements IDataService {
     }
 
     async updateCardPosition(cardId: string, newColId: string, idx: number): Promise<void> {
-        await fetch(`${API_BASE}/cards/${cardId}`, { method: 'PATCH', body: JSON.stringify({ column_id: newColId }) });
+        await fetch(`${API_BASE}/cards/${cardId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ columnId: newColId, column_id: newColId, newIndex: idx })
+        });
     }
 
     async getReactions(boardId: string, since: number): Promise<any[]> {

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { serverDataService } from '@/services/server';
 
-export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     try {
         const body = await request.json();
@@ -17,6 +17,10 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     } catch (error) {
         return NextResponse.json({ error: 'Error' }, { status: 500 });
     }
+}
+
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    return PATCH(request, props);
 }
 
 export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {

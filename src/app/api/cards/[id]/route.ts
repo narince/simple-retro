@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { serverDataService } from '@/services/server';
 
-export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     try {
         const body = await request.json();
@@ -12,9 +12,10 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
             return NextResponse.json({ success: true });
         }
 
-        if (body.columnId) {
+        const columnId = body.columnId || body.column_id;
+        if (columnId) {
             // Move
-            await serverDataService.updateCardPosition(params.id, body.columnId, body.newIndex || 0);
+            await serverDataService.updateCardPosition(params.id, columnId, body.newIndex || body.new_index || 0);
             return NextResponse.json({ success: true });
         }
 
@@ -23,6 +24,10 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     } catch (error) {
         return NextResponse.json({ error: 'Error' }, { status: 500 });
     }
+}
+
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    return PATCH(request, props);
 }
 
 export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
