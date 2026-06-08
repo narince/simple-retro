@@ -89,11 +89,21 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(initialContent);
     const [cardColor, setCardColor] = useState(initialColor);
+    const [hexInput, setHexInput] = useState("");
 
     // Sync Color when Column Color changes
     useEffect(() => {
         setCardColor(initialColor);
     }, [initialColor]);
+
+    // Sync hex input when card color changes
+    useEffect(() => {
+        if (cardColor && cardColor.startsWith('#')) {
+            setHexInput(cardColor);
+        } else {
+            setHexInput("");
+        }
+    }, [cardColor]);
 
     // Comments Logic
     // We handle mixed legacy strings and new Comment objects
@@ -293,15 +303,55 @@ export function BoardCard({ id, content: initialContent, votes: initialVotes, co
                                     <DropdownMenuSubTrigger>
                                         <Palette className="mr-2 h-4 w-4" /> {t('board.color')}
                                     </DropdownMenuSubTrigger>
-                                    <DropdownMenuSubContent className="p-1 grid grid-cols-5 gap-1">
-                                        {CARD_COLORS.map(c => (
-                                            <div
-                                                key={c.name}
-                                                className={cn("w-6 h-6 rounded-sm cursor-pointer border border-transparent hover:border-slate-500", c.class)}
-                                                onClick={() => handleColorChange(c.class)}
-                                                title={t(`colors.${c.name.toLowerCase()}` as any)}
+                                    <DropdownMenuSubContent className="w-48 p-2">
+                                        <div className="grid grid-cols-5 gap-1 mb-2">
+                                            {CARD_COLORS.map(c => (
+                                                <div
+                                                    key={c.name}
+                                                    className={cn("w-6 h-6 rounded-sm cursor-pointer border border-transparent hover:border-slate-500", c.class)}
+                                                    onClick={() => handleColorChange(c.class)}
+                                                    title={t(`colors.${c.name.toLowerCase()}` as any)}
+                                                />
+                                            ))}
+                                        </div>
+                                        <DropdownMenuSeparator className="my-1.5" />
+                                        <div 
+                                            className="flex items-center gap-1.5 px-1 pt-1" 
+                                            onPointerDown={(e) => e.stopPropagation()}
+                                            onKeyDown={(e) => e.stopPropagation()}
+                                            onKeyUp={(e) => e.stopPropagation()}
+                                        >
+                                            <input
+                                                type="color"
+                                                className="w-6 h-6 rounded-sm cursor-pointer border border-zinc-300 dark:border-zinc-700 p-0 bg-transparent shrink-0"
+                                                value={cardColor && cardColor.startsWith('#') ? cardColor : "#64748b"}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setHexInput(val);
+                                                    handleColorChange(val);
+                                                }}
                                             />
-                                        ))}
+                                            <input
+                                                type="text"
+                                                placeholder="#HEX"
+                                                className="flex-1 text-[10px] px-1.5 py-1 border border-zinc-200 dark:border-zinc-800 rounded bg-transparent text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-slate-500 uppercase h-6"
+                                                value={hexInput}
+                                                onChange={(e) => {
+                                                    let val = e.target.value;
+                                                    if (val && !val.startsWith('#')) {
+                                                        val = '#' + val;
+                                                    }
+                                                    // Allow typing valid hex characters and limit length
+                                                    if (/^#[0-9A-Fa-f]{0,8}$/.test(val)) {
+                                                        setHexInput(val);
+                                                        // If it's a complete valid hex (3, 4, 6 or 8 hex digits), update color in database
+                                                        if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(val)) {
+                                                            handleColorChange(val);
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </div>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
                                 {canDeleteCard && (
