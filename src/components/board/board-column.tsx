@@ -62,6 +62,16 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
     const [animateRef] = useAutoAnimate();
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleInput, setTitleInput] = useState(title);
+    const [hexInput, setHexInput] = useState("");
+
+    // Sync hex input when color changes
+    useEffect(() => {
+        if (color && color.startsWith('#')) {
+            setHexInput(color);
+        } else {
+            setHexInput("");
+        }
+    }, [color]);
 
     const setRefs = useCallback((node: HTMLElement | null) => {
         setNodeRef(node);
@@ -271,15 +281,53 @@ export function BoardColumn({ column, cards, onAddCard, onUpdateTitle, onDeleteC
                             <DropdownMenuSubTrigger>
                                 <Palette className="mr-2 h-4 w-4" /> {t('board.color')}
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="p-2 grid grid-cols-3 gap-2 min-w-[100px] -ml-1">
-                                {COLUMN_COLORS.map(c => (
-                                    <div
-                                        key={c.name}
-                                        className={cn("w-6 h-6 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition-transform", c.class)}
-                                        onClick={() => onUpdateColor?.(id, c.class)}
-                                        title={t(`colors.${c.name.toLowerCase()}` as any)}
+                            <DropdownMenuSubContent className="w-48 p-2">
+                                <div className="grid grid-cols-4 gap-2 mb-2">
+                                    {COLUMN_COLORS.map(c => (
+                                        <div
+                                            key={c.name}
+                                            className={cn("w-6 h-6 rounded-full cursor-pointer border-2 border-transparent hover:scale-110 transition-transform", c.class)}
+                                            onClick={() => onUpdateColor?.(id, c.class)}
+                                            title={t(`colors.${c.name.toLowerCase()}` as any)}
+                                        />
+                                    ))}
+                                </div>
+                                <DropdownMenuSeparator className="my-1.5" />
+                                <div 
+                                    className="flex items-center gap-1.5 px-1 pt-1" 
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onKeyDown={(e) => e.stopPropagation()}
+                                    onKeyUp={(e) => e.stopPropagation()}
+                                >
+                                    <input
+                                        type="color"
+                                        className="w-6 h-6 rounded-sm cursor-pointer border border-zinc-300 dark:border-zinc-700 p-0 bg-transparent shrink-0"
+                                        value={color && color.startsWith('#') ? color : "#10B981"}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setHexInput(val);
+                                            onUpdateColor?.(id, val);
+                                        }}
                                     />
-                                ))}
+                                    <input
+                                        type="text"
+                                        placeholder="#HEX"
+                                        className="flex-1 text-[10px] px-1.5 py-1 border border-zinc-200 dark:border-zinc-800 rounded bg-transparent text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-slate-500 uppercase h-6"
+                                        value={hexInput}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (val && !val.startsWith('#')) {
+                                                val = '#' + val;
+                                            }
+                                            if (/^#[0-9A-Fa-f]{0,8}$/.test(val)) {
+                                                setHexInput(val);
+                                                if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(val)) {
+                                                    onUpdateColor?.(id, val);
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
                         <DropdownMenuSeparator />
